@@ -1,0 +1,42 @@
+/* Styling untuk Sidebar */
+.sidebar {
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    background-color: #333;
+    padding-top: 20px;
+    color: #fff;
+}
+
+.sidebar a {
+    color: #fff;
+    text-decoration: none;
+    display: block;
+    padding: 10px 15px;
+}
+
+.sidebar a:hover {
+    background-color: #575757;
+}
+
+.submenu-list {
+    display: none; /* Awalnya disembunyikan */
+    padding-left: 20px;
+}
+
+.submenu-list a {
+    padding: 10px 15px;
+    color: #ddd;
+}
+
+.submenu-list a:hover {
+    background-color: #666;
+}
+
+/* Untuk konten utama */
+.main-content {
+    margin-left: 250px;
+    padding: 20px;
+}
