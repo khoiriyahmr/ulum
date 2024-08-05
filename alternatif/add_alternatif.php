@@ -1,42 +1,52 @@
 <?php
-// Include file koneksi database
-
+include '../config.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nama_siswa = $_POST['nama_siswa'];
     $kelas = $_POST['kelas'];
     $nisn = $_POST['nisn'];
 
-    $insertQuery = "INSERT INTO Siswa (nama_siswa, kelas, nisn) VALUES ('$nama_siswa', '$kelas', '$nisn')";
-    mysqli_query($conn, $insertQuery);
 
-    header("Location: alternatif.php");
+    $nama_siswa = mysqli_real_escape_string($conn, $nama_siswa);
+    $kelas = mysqli_real_escape_string($conn, $kelas);
+    $nisn = mysqli_real_escape_string($conn, $nisn);
+
+
+
+    $sql = "INSERT INTO Siswa (nama_siswa, kelas, nisn) VALUES ('$nama_siswa', '$kelas', '$nisn')";
+    if (mysqli_query($conn, $sql)) {
+
+        header("Location: ../index.php?page=alternatif");
+        exit();
+    } else {
+        echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+    }
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tambah Siswa</title>
-    <link rel="stylesheet" href="css/styles.css"> <!-- Ganti dengan link ke file CSS Anda -->
+    <title>Add Siwa</title>
 </head>
 
 <body>
-    <h1>Tambah Siswa</h1>
-
-    <form action="add_alternatif.php" method="post">
+    <h1>Add Siswa</h1>
+    <form method="post" action="">
         <label for="nama_siswa">Nama Siswa:</label>
         <input type="text" id="nama_siswa" name="nama_siswa" required>
+        <br>
         <label for="kelas">Kelas:</label>
-        <input type="text" id="kelas" name="kelas" required>
+        <input type="number" id="kelas" name="kelas" step="0.01" required>
+        <br>
         <label for="nisn">NISN:</label>
-        <input type="text" id="nisn" name="nisn" required>
-        <button type="submit">Tambah</button>
+        <input type="number" id="nisn" name="nisn" step="0.01" required>
+        <br>
+        <input type="submit" value="Add alternatif">
     </form>
-
-    <a href="alternatif.php" class="btn">Kembali</a>
 </body>
 
 </html>
