@@ -13,13 +13,13 @@
         <nav>
             <ul>
                 <li><a href="index.php?page=home">Home</a></li>
-                <li><a href="index.php?page=kriteria">Kriteria</a></li>
-                <li><a href="index.php?page=alternatif">Alternatif</a></li>
-                <li><a href="index.php?page=perbandingan_kriteria">Perbandingan Kriteria</a></li>
+                <li><a href="kriteria/kriteria.php">Kriteria</a></li>
+                <li><a href="alternatif/alternatif.php">Alternatif</a></li>
+                <li><a href="perbandingan/kriteria/perbandingan_kriteria.php">Perbandingan Kriteria</a></li>
                 <li class="submenu">
                     <a href="#" class="submenu-toggle">Perbandingan Alternatif</a>
                     <ul class="submenu-list">
-                        <li><a href="index.php?page=nilai_raport">Nilai Raport</a></li>
+                        <li><a href="perbandingan/alternatif/nilai_raport.php">Nilai Raport</a></li>
                         <li><a href="index.php?page=ekstrakurikuler">Ekstrakurikuler</a></li>
                         <li><a href="index.php?page=prestasi">Prestasi</a></li>
                         <li><a href="index.php?page=absensi">Absensi</a></li>

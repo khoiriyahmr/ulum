@@ -1,65 +1,94 @@
 <?php
-include 'config.php';
+include '../config.php';
 
-// Hapus Kriteria jika ada permintaan delete
-if (isset($_GET['delete'])) {
-    $id_kriteria = $_GET['delete'];
-
-    // Cek apakah kriteria ini digunakan di tabel lain
-    $check_sql = "SELECT COUNT(*) AS count FROM Penilaian WHERE id_kriteria = $id_kriteria";
-    $check_result = mysqli_query($conn, $check_sql);
-    $check_row = mysqli_fetch_assoc($check_result);
-
-    if ($check_row['count'] > 0) {
-        echo "Kriteria ini tidak bisa dihapus karena sedang digunakan dalam tabel lain.";
-    } else {
-        $sql = "DELETE FROM Kriteria WHERE id_kriteria = $id_kriteria";
-        if (mysqli_query($conn, $sql)) {
-            // Penghapusan berhasil
-            header("Location: ../index.php?page=kriteria");
-            exit();
-        } else {
-            echo "Error deleting record: " . mysqli_error($conn);
-        }
-    }
+// Menambah Kriteria
+if (isset($_POST['add_kriteria'])) {
+    $nama_kriteria = $_POST['nama_kriteria'];
+    $bobot = $_POST['bobot'];
+    $sql = "INSERT INTO kriteria (nama_kriteria, bobot) VALUES ('$nama_kriteria', '$bobot')";
+    $conn->query($sql);
 }
 
-// Ambil data kriteria
-$sql = "SELECT * FROM Kriteria";
-$result = mysqli_query($conn, $sql);
+// Menghapus Kriteria
+if (isset($_GET['delete'])) {
+    $id = $_GET['delete'];
+    $sql = "DELETE FROM kriteria WHERE id_kriteria = $id";
+    $conn->query($sql);
+}
+
+// Mengedit Kriteria
+if (isset($_GET['edit'])) {
+    $id = $_GET['edit'];
+    $sql = "SELECT * FROM kriteria WHERE id_kriteria = $id";
+    $result = $conn->query($sql);
+    $kriteria = $result->fetch_assoc();
+}
+
+// Memproses Update Kriteria
+if (isset($_POST['edit_kriteria'])) {
+    $id = $_POST['id_kriteria'];
+    $nama_kriteria = $_POST['nama_kriteria'];
+    $bobot = $_POST['bobot'];
+    $sql = "UPDATE kriteria SET nama_kriteria='$nama_kriteria', bobot='$bobot' WHERE id_kriteria=$id";
+    $conn->query($sql);
+    header("Location: kriteria.php");
+}
 ?>
 
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kriteria</title>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Manajemen Kriteria</title>
 </head>
+
 <body>
-    <h1>Data Kriteria</h1>
-    <a href="kriteria/add_kriteria.php">Add Kriteria</a>
+
+    <h1>Manajemen Kriteria</h1>
+
+    <!-- Formulir Tambah Kriteria -->
+    <form action="" method="POST">
+        <input type="text" name="nama_kriteria" placeholder="Nama Kriteria" required>
+        <input type="number" step="0.01" name="bobot" placeholder="Bobot" required>
+        <button type="submit" name="add_kriteria">Add</button>
+    </form>
+
+    <!-- Formulir Edit Kriteria -->
+    <?php if (isset($kriteria)) : ?>
+        <h2>Edit Kriteria</h2>
+        <form action="" method="POST">
+            <input type="hidden" name="id_kriteria" value="<?php echo $kriteria['id_kriteria']; ?>">
+            <input type="text" name="nama_kriteria" value="<?php echo $kriteria['nama_kriteria']; ?>" required>
+            <input type="number" step="0.01" name="bobot" value="<?php echo $kriteria['bobot']; ?>" required>
+            <button type="submit" name="edit_kriteria">Update</button>
+        </form>
+    <?php endif; ?>
+
+    <h2>Daftar Kriteria</h2>
     <table border="1">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Nama Kriteria</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php while ($row = mysqli_fetch_assoc($result)) { ?>
-                <tr>
-                    <td><?php echo $row['id_kriteria']; ?></td>
-                    <td><?php echo $row['nama_kriteria']; ?></td>
-                    <td>
-                        <a href="kriteria/edit_kriteria.php?id=<?php echo $row['id_kriteria']; ?>">Edit</a>
-                        <a href="kriteria/delete_kriteria.php?id=<?php echo $row['id_kriteria']; ?>" onclick="return confirm('Are you sure you want to delete this item?');">Delete</a>
-                    </td>
-                </tr>
-            <?php } ?>
-        </tbody>
+        <tr>
+            <th>ID</th>
+            <th>Nama Kriteria</th>
+            <th>Bobot</th>
+            <th>Aksi</th>
+        </tr>
+        <?php
+        $sql = "SELECT * FROM kriteria";
+        $result = $conn->query($sql);
+
+        while ($row = $result->fetch_assoc()) {
+            echo "<tr>";
+            echo "<td>" . $row['id_kriteria'] . "</td>";
+            echo "<td>" . $row['nama_kriteria'] . "</td>";
+            echo "<td>" . $row['bobot'] . "</td>";
+            echo "<td>
+                    <a href='kriteria.php?edit=" . $row['id_kriteria'] . "'>Edit</a>
+                    <a href='kriteria.php?delete=" . $row['id_kriteria'] . "' onclick=\"return confirm('Anda yakin ingin menghapus kriteria ini?')\">Delete</a>
+                  </td>";
+            echo "</tr>";
+        }
+        ?>
     </table>
 </body>
+
 </html>
