@@ -1,13 +1,10 @@
 <?php
 include 'config.php';
 
-// Mengatur halaman default
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
-// Header
 include 'header.php';
 
-// Routing
 switch ($page) {
     case 'home':
         include 'home.php';
@@ -44,5 +41,4 @@ switch ($page) {
         break;
 }
 
-// Footer
 include 'footer.php';
