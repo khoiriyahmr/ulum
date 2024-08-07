@@ -1,5 +1,5 @@
 <?php
-include 'config.php';
+include '../config.php';
 
 // Ambil filter kelas dari parameter GET
 $kelas_filter = isset($_GET['kelas']) ? $_GET['kelas'] : 'all';
@@ -29,7 +29,7 @@ $result = $conn->query($sql);
     <h1>Daftar Periode</h1>
 
     <!-- Dropdown Filter Kelas -->
-    <form method="GET">
+    <form method="GET" action="">
         <label for="kelas">Filter Kelas:</label>
         <select name="kelas" id="kelas" onchange="this.form.submit()">
             <option value="all" <?php echo $kelas_filter == 'all' ? 'selected' : ''; ?>>All</option>

@@ -26,7 +26,7 @@
                     </ul>
                 </li>
                 <li><a href="index.php?page=hasil">Hasil</a></li>
-                <li><a href="index.php?page=periode">Periode</a></li>
+                <li><a href="periode/periode.php">Periode</a></li>
             </ul>
         </nav>
     </div>
