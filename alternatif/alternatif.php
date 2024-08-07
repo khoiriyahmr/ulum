@@ -5,43 +5,43 @@ include '../config.php';
 if (isset($_POST['add_alternatif'])) {
     $nama = $_POST['nama'];
     $kelas = $_POST['kelas'];
-    $nisn = $_POST['nisn'];
+
     $nilai_raport = $_POST['nilai_raport'];
-    $nilai_ekstrakurikuler = $_POST['nilai_ekstrakurikuler'];
-    $nilai_prestasi = $_POST['nilai_prestasi'];
-    $nilai_absensi = $_POST['nilai_absensi'];
-    $sql = "INSERT INTO siswa (nama, kelas, nisn, nilai_raport, nilai_ekstrakurikuler, nilai_prestasi, nilai_absensi)
-            VALUES ('$nama', '$kelas', '$nisn', '$nilai_raport', '$nilai_ekstrakurikuler', '$nilai_prestasi', '$nilai_absensi')";
+    $extrakurikuler = $_POST['extrakurikuler'];
+    $prestasi = $_POST['prestasi'];
+    $absensi = $_POST['absensi'];
+    $sql = "INSERT INTO alternatif (nama, kelas,  nilai_raport, extrakurikuler, prestasi, absensi)
+            VALUES ('$nama', '$kelas',  '$nilai_raport', '$extrakurikuler', '$prestasi', '$absensi')";
     $conn->query($sql);
 }
 
 // Menghapus Alternatif
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
-    $sql = "DELETE FROM siswa WHERE id_siswa = $id";
+    $sql = "DELETE FROM alternatif WHERE id_alternatif = $id";
     $conn->query($sql);
 }
 
 // Mengedit Alternatif
 if (isset($_GET['edit'])) {
     $id = $_GET['edit'];
-    $sql = "SELECT * FROM siswa WHERE id_siswa = $id";
+    $sql = "SELECT * FROM alternatif WHERE id_alternatif = $id";
     $result = $conn->query($sql);
     $alternatif = $result->fetch_assoc();
 }
 
 // Memproses Update Alternatif
 if (isset($_POST['edit_alternatif'])) {
-    $id = $_POST['id_siswa'];
+    $id = $_POST['id_alternatif'];
     $nama = $_POST['nama'];
     $kelas = $_POST['kelas'];
-    $nisn = $_POST['nisn'];
+
     $nilai_raport = $_POST['nilai_raport'];
-    $nilai_ekstrakurikuler = $_POST['nilai_ekstrakurikuler'];
-    $nilai_prestasi = $_POST['nilai_prestasi'];
-    $nilai_absensi = $_POST['nilai_absensi'];
-    $sql = "UPDATE siswa SET nama='$nama', kelas='$kelas', nisn='$nisn', nilai_raport='$nilai_raport', 
-            nilai_ekstrakurikuler='$nilai_ekstrakurikuler', nilai_prestasi='$nilai_prestasi', nilai_absensi='$nilai_absensi' WHERE id_siswa=$id";
+    $extrakurikuler = $_POST['extrakurikuler'];
+    $prestasi = $_POST['prestasi'];
+    $absensi = $_POST['absensi'];
+    $sql = "UPDATE alternatif SET nama='$nama', kelas='$kelas',  nilai_raport='$nilai_raport', 
+            extrakurikuler='$extrakurikuler', prestasi='$prestasi', absensi='$absensi' WHERE id_alternatif=$id";
     $conn->query($sql);
     header("Location: alternatif.php");
 }
@@ -63,9 +63,9 @@ if (isset($_POST['edit_alternatif'])) {
         <input type="text" name="kelas" placeholder="Kelas" required>
         <input type="text" name="nisn" placeholder="NISN" required>
         <input type="number" step="0.01" name="nilai_raport" placeholder="Nilai Raport" required>
-        <input type="number" step="0.01" name="nilai_ekstrakurikuler" placeholder="Nilai Ekstrakurikuler" required>
-        <input type="number" step="0.01" name="nilai_prestasi" placeholder="Nilai Prestasi" required>
-        <input type="number" step="0.01" name="nilai_absensi" placeholder="Nilai Absensi" required>
+        <input type="number" step="0.01" name="extrakurikuler" placeholder="Nilai Ekstrakurikuler" required>
+        <input type="number" step="0.01" name="prestasi" placeholder="Nilai Prestasi" required>
+        <input type="number" step="0.01" name="absensi" placeholder="Nilai Absensi" required>
         <button type="submit" name="add_alternatif">Add</button>
     </form>
 
@@ -73,14 +73,14 @@ if (isset($_POST['edit_alternatif'])) {
     <?php if (isset($alternatif)) : ?>
         <h2>Edit Alternatif</h2>
         <form action="" method="POST">
-            <input type="hidden" name="id_siswa" value="<?php echo $alternatif['id_siswa']; ?>">
+            <input type="hidden" name="id_alternatif" value="<?php echo $alternatif['id_alternatif']; ?>">
             <input type="text" name="nama" value="<?php echo $alternatif['nama']; ?>" required>
             <input type="text" name="kelas" value="<?php echo $alternatif['kelas']; ?>" required>
-            <input type="text" name="nisn" value="<?php echo $alternatif['nisn']; ?>" required>
+
             <input type="number" step="0.01" name="nilai_raport" value="<?php echo $alternatif['nilai_raport']; ?>" required>
-            <input type="number" step="0.01" name="nilai_ekstrakurikuler" value="<?php echo $alternatif['nilai_ekstrakurikuler']; ?>" required>
-            <input type="number" step="0.01" name="nilai_prestasi" value="<?php echo $alternatif['nilai_prestasi']; ?>" required>
-            <input type="number" step="0.01" name="nilai_absensi" value="<?php echo $alternatif['nilai_absensi']; ?>" required>
+            <input type="number" step="0.01" name="extrakurikuler" value="<?php echo $alternatif['extrakurikuler']; ?>" required>
+            <input type="number" step="0.01" name="prestasi" value="<?php echo $alternatif['prestasi']; ?>" required>
+            <input type="number" step="0.01" name="absensi" value="<?php echo $alternatif['absensi']; ?>" required>
             <button type="submit" name="edit_alternatif">Update</button>
         </form>
     <?php endif; ?>
@@ -91,7 +91,7 @@ if (isset($_POST['edit_alternatif'])) {
             <th>ID</th>
             <th>Nama</th>
             <th>Kelas</th>
-            <th>NISN</th>
+
             <th>Nilai Raport</th>
             <th>Nilai Ekstrakurikuler</th>
             <th>Nilai Prestasi</th>
@@ -99,22 +99,22 @@ if (isset($_POST['edit_alternatif'])) {
             <th>Aksi</th>
         </tr>
         <?php
-        $sql = "SELECT * FROM siswa";
+        $sql = "SELECT * FROM alternatif";
         $result = $conn->query($sql);
 
         while ($row = $result->fetch_assoc()) {
             echo "<tr>";
-            echo "<td>" . $row['id_siswa'] . "</td>";
+            echo "<td>" . $row['id_alternatif'] . "</td>";
             echo "<td>" . $row['nama'] . "</td>";
             echo "<td>" . $row['kelas'] . "</td>";
-            echo "<td>" . $row['nisn'] . "</td>";
+
             echo "<td>" . $row['nilai_raport'] . "</td>";
-            echo "<td>" . $row['nilai_ekstrakurikuler'] . "</td>";
-            echo "<td>" . $row['nilai_prestasi'] . "</td>";
-            echo "<td>" . $row['nilai_absensi'] . "</td>";
+            echo "<td>" . $row['extrakurikuler'] . "</td>";
+            echo "<td>" . $row['prestasi'] . "</td>";
+            echo "<td>" . $row['absensi'] . "</td>";
             echo "<td>
-                    <a href='alternatif.php?edit=" . $row['id_siswa'] . "'>Edit</a>
-                    <a href='alternatif.php?delete=" . $row['id_siswa'] . "' onclick=\"return confirm('Anda yakin ingin menghapus alternatif ini?')\">Delete</a>
+                    <a href='alternatif.php?edit=" . $row['id_alternatif'] . "'>Edit</a>
+                    <a href='alternatif.php?delete=" . $row['id_alternatif'] . "' onclick=\"return confirm('Anda yakin ingin menghapus alternatif ini?')\">Delete</a>
                   </td>";
             echo "</tr>";
         }

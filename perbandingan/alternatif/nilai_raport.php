@@ -1,202 +1,96 @@
 <?php
-// Menghubungkan ke database
 include '../../config.php';
 
-// Menambah Perbandingan Alternatif Nilai Raport
-if (isset($_POST['add_perbandingan'])) {
-    $alternatif1_id = $_POST['alternatif1_id'];
-    $alternatif2_id = $_POST['alternatif2_id'];
+// Ambil data alternatif dari tabel alternatif
+$sql = "SELECT id_alternatif, nama, nilai_raport FROM alternatif";
+$result = $conn->query($sql);
 
-    $sql = "INSERT INTO perbandingan_alternatif_raport (alternatif1_id, alternatif2_id) VALUES ('$alternatif1_id', '$alternatif2_id')";
-    if ($conn->query($sql) === TRUE) {
-        echo "<p>Perbandingan alternatif nilai raport berhasil ditambahkan.</p>";
-        calculate_ahp_raport(); // Otomatis menghitung AHP setelah menambah
-    } else {
-        echo "<p>Error: " . $conn->error . "</p>";
-    }
+if (!$result) {
+    die("Error: " . $conn->error);
 }
 
-// Menghapus Perbandingan Alternatif Nilai Raport
-if (isset($_GET['delete'])) {
-    $id = $_GET['delete'];
-    $sql = "DELETE FROM perbandingan_alternatif_raport WHERE id_perbandingan = $id";
-    if ($conn->query($sql) === TRUE) {
-        echo "<p>Perbandingan alternatif nilai raport berhasil dihapus.</p>";
-        calculate_ahp_raport(); // Otomatis menghitung AHP setelah menghapus
-    } else {
-        echo "<p>Error: " . $conn->error . "</p>";
-    }
+$alternatifs = [];
+while ($row = $result->fetch_assoc()) {
+    $alternatifs[$row['id_alternatif']] = $row;
 }
 
-// Mengedit Perbandingan Alternatif Nilai Raport
-if (isset($_GET['edit'])) {
-    $id = $_GET['edit'];
-    $sql = "SELECT * FROM perbandingan_alternatif_raport WHERE id_perbandingan = $id";
-    $result = $conn->query($sql);
-    $perbandingan = $result->fetch_assoc();
-}
-
-// Memproses Update Perbandingan Alternatif Nilai Raport
-if (isset($_POST['edit_perbandingan'])) {
-    $id = $_POST['id_perbandingan'];
-    $alternatif1_id = $_POST['alternatif1_id'];
-    $alternatif2_id = $_POST['alternatif2_id'];
-
-    $sql = "UPDATE perbandingan_alternatif_raport SET alternatif1_id='$alternatif1_id', alternatif2_id='$alternatif2_id' WHERE id_perbandingan=$id";
-    if ($conn->query($sql) === TRUE) {
-        echo "<p>Perbandingan alternatif nilai raport berhasil diperbarui.</p>";
-        calculate_ahp_raport(); // Otomatis menghitung AHP setelah mengupdate
-    } else {
-        echo "<p>Error: " . $conn->error . "</p>";
-    }
-}
-
-// Proses Perhitungan AHP untuk Nilai Raport
-function calculate_ahp_raport()
+// Fungsi untuk menghitung AHP
+function calculate_ahp_raport($alternatifs)
 {
     global $conn;
 
-    // Ambil semua data perbandingan alternatif nilai raport
-    $sql = "SELECT * FROM perbandingan_alternatif_raport";
-    $result = $conn->query($sql);
-
     $matrix = [];
-    $alternatif = [];
-    $alternatif_map = [];
+    $num_alternatif = count($alternatifs);
 
-    // Membuat matrix perbandingan
-    while ($row = $result->fetch_assoc()) {
-        $alternatif1_id = $row['alternatif1_id'];
-        $alternatif2_id = $row['alternatif2_id'];
-        $alternatif[$alternatif1_id] = 1;
-        $alternatif[$alternatif2_id] = 1;
-        $matrix[$alternatif1_id][$alternatif2_id] = get_raport_value($alternatif1_id) / get_raport_value($alternatif2_id);
-        $matrix[$alternatif2_id][$alternatif1_id] = 1 / $matrix[$alternatif1_id][$alternatif2_id];
+    // Membuat matriks perbandingan berdasarkan nilai raport
+    foreach ($alternatifs as $id1 => $alt1) {
+        foreach ($alternatifs as $id2 => $alt2) {
+            if ($alt2['nilai_raport'] != 0) {
+                $matrix[$id1][$id2] = $alt1['nilai_raport'] / $alt2['nilai_raport'];
+            } else {
+                $matrix[$id1][$id2] = 0; // Menghindari pembagian dengan nol
+            }
+        }
     }
 
-    // Normalisasi matrix
-    $num_alternatif = count($matrix);
+    // Normalisasi matriks
     $normalized_matrix = [];
     foreach ($matrix as $row_id => $row) {
         $sum = array_sum($row);
         foreach ($row as $col_id => $value) {
-            $normalized_matrix[$row_id][$col_id] = $value / $sum;
+            $normalized_matrix[$row_id][$col_id] = $sum != 0 ? $value / $sum : 0;
         }
     }
 
-    // Menghitung bobot
-    $weights = [];
-    foreach ($normalized_matrix as $row_id => $row) {
-        $weights[$row_id] = array_sum($row) / $num_alternatif;
+    // Simpan data perbandingan ke tabel
+    $sql = "INSERT INTO perbandingan_alternatif_raport (alternatif1_id, alternatif2_id, nilai)
+            VALUES (?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+
+    foreach ($matrix as $id1 => $row) {
+        foreach ($row as $id2 => $value) {
+            if ($id1 != $id2) { // Menghindari perbandingan diri sendiri
+                $stmt->bind_param("iid", $id1, $id2, $value);
+                $stmt->execute();
+            }
+        }
     }
 
-    // Update bobot alternatif di database
-    foreach ($weights as $alternatif_id => $weight) {
-        $sql = "UPDATE alternatif SET bobot_raport = $weight WHERE id_alternatif = $alternatif_id";
-        $conn->query($sql);
-    }
-
-    echo "<p>Perhitungan AHP untuk nilai raport berhasil dilakukan dan bobot alternatif diperbarui.</p>";
+    return $matrix;
 }
 
-function get_raport_value($id_alternatif)
-{
-    global $conn;
-    $sql = "SELECT nilai_raport FROM alternatif WHERE id_alternatif = $id_alternatif";
-    $result = $conn->query($sql);
-    $row = $result->fetch_assoc();
-    return $row['nilai_raport'];
-}
+// Memanggil fungsi perhitungan AHP untuk nilai raport
+$matrix = calculate_ahp_raport($alternatifs);
+
 ?>
 
 <h2>Perbandingan Alternatif Nilai Raport</h2>
-<form action="" method="POST">
-    <select name="alternatif1_id" required>
-        <option value="">Pilih Alternatif 1</option>
-        <?php
-        $sql = "SELECT * FROM alternatif";
-        $result = $conn->query($sql);
-        while ($row = $result->fetch_assoc()) {
-            echo "<option value='" . $row['id_alternatif'] . "'";
-            if (isset($perbandingan) && $perbandingan['alternatif1_id'] == $row['id_alternatif']) {
-                echo " selected";
-            }
-            echo ">" . $row['nama'] . "</option>";
-        }
-        ?>
-    </select>
-    <select name="alternatif2_id" required>
-        <option value="">Pilih Alternatif 2</option>
-        <?php
-        $sql = "SELECT * FROM alternatif";
-        $result = $conn->query($sql);
-        while ($row = $result->fetch_assoc()) {
-            echo "<option value='" . $row['id_alternatif'] . "'";
-            if (isset($perbandingan) && $perbandingan['alternatif2_id'] == $row['id_alternatif']) {
-                echo " selected";
-            }
-            echo ">" . $row['nama'] . "</option>";
-        }
-        ?>
-    </select>
-    <?php if (isset($perbandingan)) : ?>
-        <input type="hidden" name="id_perbandingan" value="<?php echo $perbandingan['id_perbandingan']; ?>">
-        <button type="submit" name="edit_perbandingan">Update</button>
-    <?php else : ?>
-        <button type="submit" name="add_perbandingan">Add</button>
-    <?php endif; ?>
-</form>
-
-<h3>Daftar Perbandingan Alternatif Nilai Raport</h3>
-
-<?php
-// Ambil alternatif untuk tabel
-$sql = "SELECT * FROM alternatif";
-$alternatif_result = $conn->query($sql);
-$alternatif_list = [];
-while ($row = $alternatif_result->fetch_assoc()) {
-    $alternatif_list[$row['id_alternatif']] = $row['nama'];
-}
-
-// Ambil data perbandingan alternatif nilai raport
-$sql = "SELECT pa.alternatif1_id, pa.alternatif2_id, pa.nilai, a1.nama AS alternatif1, a2.nama AS alternatif2
-        FROM perbandingan_alternatif_raport pa
-        JOIN alternatif a1 ON pa.alternatif1_id = a1.id_alternatif
-        JOIN alternatif a2 ON pa.alternatif2_id = a2.id_alternatif";
-$perbandingan_result = $conn->query($sql);
-$perbandingan_data = [];
-while ($row = $perbandingan_result->fetch_assoc()) {
-    $perbandingan_data[$row['alternatif1_id']][$row['alternatif2_id']] = $row['nilai'];
-}
-?>
 
 <table border="1">
     <thead>
         <tr>
             <th>Alternatif</th>
-            <?php foreach ($alternatif_list as $id => $nama) : ?>
-                <th><?php echo $nama; ?></th>
+            <?php foreach ($alternatifs as $alt) : ?>
+                <th><?php echo htmlspecialchars($alt['nama']); ?></th>
             <?php endforeach; ?>
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($alternatif_list as $id1 => $nama1) : ?>
+        <?php if (!empty($matrix)) : ?>
+            <?php foreach ($alternatifs as $id1 => $alt1) : ?>
+                <tr>
+                    <td><?php echo htmlspecialchars($alt1['nama']); ?></td>
+                    <?php foreach ($alternatifs as $id2 => $alt2) : ?>
+                        <td>
+                            <?php echo isset($matrix[$id1][$id2]) ? number_format($matrix[$id1][$id2], 2) : '0'; ?>
+                        </td>
+                    <?php endforeach; ?>
+                </tr>
+            <?php endforeach; ?>
+        <?php else : ?>
             <tr>
-                <td><?php echo $nama1; ?></td>
-                <?php foreach ($alternatif_list as $id2 => $nama2) : ?>
-                    <td>
-                        <?php
-                        if (isset($perbandingan_data[$id1][$id2])) {
-                            echo $perbandingan_data[$id1][$id2];
-                        } elseif ($id1 == $id2) {
-                            echo "1";
-                        } else {
-                            echo "";
-                        }
-                        ?>
-                    </td>
-                <?php endforeach; ?>
+                <td colspan="<?php echo count($alternatifs) + 1; ?>">Tidak ada data untuk ditampilkan.</td>
             </tr>
-        <?php endforeach; ?>
+        <?php endif; ?>
     </tbody>
 </table>
