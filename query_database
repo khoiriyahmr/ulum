@@ -7,7 +7,8 @@ CREATE TABLE kriteria (
 CREATE TABLE periode (
     id_periode INT AUTO_INCREMENT PRIMARY KEY,
     tahun YEAR NOT NULL,
-    status ENUM('Aktif', 'Nonaktif') NOT NULL
+    id_alternatif INT,
+    FOREIGN KEY (id_alternatif) REFERENCES alternatif(id_alternatif) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE alternatif (
@@ -17,7 +18,9 @@ CREATE TABLE alternatif (
     nilai_raport DECIMAL(5,2),
     extrakurikuler DECIMAL(5,2),
     prestasi DECIMAL(5,2),
-    absensi DECIMAL(5,2)
+    absensi DECIMAL(5,2),
+    id_periode INT,
+    FOREIGN KEY (id_periode) REFERENCES periode(id_periode) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE perbandingan_alternatif_raport (
