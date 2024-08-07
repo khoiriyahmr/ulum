@@ -4,7 +4,6 @@ CREATE TABLE kriteria (
     bobot FLOAT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-
 CREATE TABLE periode (
     id_periode INT AUTO_INCREMENT PRIMARY KEY,
     tahun YEAR NOT NULL,
@@ -26,8 +25,8 @@ CREATE TABLE perbandingan_alternatif_raport (
     alternatif1_id INT,
     alternatif2_id INT,
     nilai DECIMAL(5,2),
-    FOREIGN KEY (alternatif1_id) REFERENCES alternatif(id_alternatif),
-    FOREIGN KEY (alternatif2_id) REFERENCES alternatif(id_alternatif)
+    FOREIGN KEY (alternatif1_id) REFERENCES alternatif(id_alternatif) ON DELETE CASCADE,
+    FOREIGN KEY (alternatif2_id) REFERENCES alternatif(id_alternatif) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE perbandingan_alternatif_ekstrakurikuler (
@@ -35,8 +34,8 @@ CREATE TABLE perbandingan_alternatif_ekstrakurikuler (
     alternatif1_id INT,
     alternatif2_id INT,
     nilai FLOAT,
-    FOREIGN KEY (alternatif1_id) REFERENCES alternatif(id_alternatif),
-    FOREIGN KEY (alternatif2_id) REFERENCES alternatif(id_alternatif)
+    FOREIGN KEY (alternatif1_id) REFERENCES alternatif(id_alternatif) ON DELETE CASCADE,
+    FOREIGN KEY (alternatif2_id) REFERENCES alternatif(id_alternatif) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE perbandingan_alternatif_prestasi (
@@ -44,8 +43,8 @@ CREATE TABLE perbandingan_alternatif_prestasi (
     alternatif1_id INT,
     alternatif2_id INT,
     nilai FLOAT,
-    FOREIGN KEY (alternatif1_id) REFERENCES alternatif(id_alternatif),
-    FOREIGN KEY (alternatif2_id) REFERENCES alternatif(id_alternatif)
+    FOREIGN KEY (alternatif1_id) REFERENCES alternatif(id_alternatif) ON DELETE CASCADE,
+    FOREIGN KEY (alternatif2_id) REFERENCES alternatif(id_alternatif) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE perbandingan_alternatif_absensi (
@@ -53,8 +52,8 @@ CREATE TABLE perbandingan_alternatif_absensi (
     alternatif1_id INT,
     alternatif2_id INT,
     nilai FLOAT,
-    FOREIGN KEY (alternatif1_id) REFERENCES alternatif(id_alternatif),
-    FOREIGN KEY (alternatif2_id) REFERENCES alternatif(id_alternatif)
+    FOREIGN KEY (alternatif1_id) REFERENCES alternatif(id_alternatif) ON DELETE CASCADE,
+    FOREIGN KEY (alternatif2_id) REFERENCES alternatif(id_alternatif) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE hasil (
@@ -62,14 +61,12 @@ CREATE TABLE hasil (
     id_alternatif INT,
     nilai_akhir FLOAT,
     ranking INT,
-    FOREIGN KEY (id_alternatif) REFERENCES alternatif(id_alternatif)
-    ON DELETE CASCADE
+    FOREIGN KEY (id_alternatif) REFERENCES alternatif(id_alternatif) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 
 CREATE TABLE perbandingan_kriteria (
     id_perbandingan INT AUTO_INCREMENT PRIMARY KEY,
     kriteria1_id INT NOT NULL,
     kriteria2_id INT NOT NULL,
     nilai FLOAT NOT NULL
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
