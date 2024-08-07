@@ -195,31 +195,3 @@ while ($row = $perbandingan_result->fetch_assoc()) {
         <?php endforeach; ?>
     </tbody>
 </table>
-
-<h3>Daftar Perbandingan Kriteria</h3>
-<table border="1">
-    <tr>
-        <th>Kriteria 1</th>
-        <th>Kriteria 2</th>
-        <th>Nilai</th>
-        <th>Aksi</th>
-    </tr>
-    <?php
-    $sql = "SELECT pk.id_perbandingan, k1.nama_kriteria AS kriteria1, k2.nama_kriteria AS kriteria2, pk.nilai
-            FROM perbandingan_kriteria pk
-            JOIN kriteria k1 ON pk.kriteria1_id = k1.id_kriteria
-            JOIN kriteria k2 ON pk.kriteria2_id = k2.id_kriteria";
-    $result = $conn->query($sql);
-    while ($row = $result->fetch_assoc()) {
-        echo "<tr>";
-        echo "<td>" . $row['kriteria1'] . "</td>";
-        echo "<td>" . $row['kriteria2'] . "</td>";
-        echo "<td>" . $row['nilai'] . "</td>";
-        echo "<td>
-                <a href='?edit=" . $row['id_perbandingan'] . "'>Edit</a> |
-                <a href='?delete=" . $row['id_perbandingan'] . "' onclick=\"return confirm('Are you sure?')\">Delete</a>
-              </td>";
-        echo "</tr>";
-    }
-    ?>
-</table>

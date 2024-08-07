@@ -61,7 +61,7 @@ if (isset($_POST['edit_alternatif'])) {
     <form action="" method="POST">
         <input type="text" name="nama" placeholder="Nama" required>
         <input type="text" name="kelas" placeholder="Kelas" required>
-        <input type="text" name="nisn" placeholder="NISN" required>
+
         <input type="number" step="0.01" name="nilai_raport" placeholder="Nilai Raport" required>
         <input type="number" step="0.01" name="extrakurikuler" placeholder="Nilai Ekstrakurikuler" required>
         <input type="number" step="0.01" name="prestasi" placeholder="Nilai Prestasi" required>
