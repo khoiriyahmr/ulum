@@ -1,5 +1,6 @@
 <?php
 include '../../config.php';
+include '../../navbar.php'; 
 
 // Ambil data alternatif dari tabel alternatif
 $sql = "SELECT id_alternatif, nama, nilai_raport FROM alternatif";
@@ -61,36 +62,54 @@ function calculate_ahp_raport($alternatifs)
 
 // Memanggil fungsi perhitungan AHP untuk nilai raport
 $matrix = calculate_ahp_raport($alternatifs);
-
 ?>
 
-<h2>Perbandingan Alternatif Nilai Raport</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perbandingan Alternatif Nilai Raport</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
-<table border="1">
-    <thead>
-        <tr>
-            <th>Alternatif</th>
-            <?php foreach ($alternatifs as $alt) : ?>
-                <th><?php echo htmlspecialchars($alt['nama']); ?></th>
-            <?php endforeach; ?>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (!empty($matrix)) : ?>
-            <?php foreach ($alternatifs as $id1 => $alt1) : ?>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="mb-4">Perbandingan Alternatif Nilai Raport</h2>
+
+        <table class="table table-bordered">
+            <thead class="thead-light">
                 <tr>
-                    <td><?php echo htmlspecialchars($alt1['nama']); ?></td>
-                    <?php foreach ($alternatifs as $id2 => $alt2) : ?>
-                        <td>
-                            <?php echo isset($matrix[$id1][$id2]) ? number_format($matrix[$id1][$id2], 2) : '0'; ?>
-                        </td>
+                    <th>Alternatif</th>
+                    <?php foreach ($alternatifs as $alt) : ?>
+                        <th><?php echo htmlspecialchars($alt['nama']); ?></th>
                     <?php endforeach; ?>
                 </tr>
-            <?php endforeach; ?>
-        <?php else : ?>
-            <tr>
-                <td colspan="<?php echo count($alternatifs) + 1; ?>">Tidak ada data untuk ditampilkan.</td>
-            </tr>
-        <?php endif; ?>
-    </tbody>
-</table>
+            </thead>
+            <tbody>
+                <?php if (!empty($matrix)) : ?>
+                    <?php foreach ($alternatifs as $id1 => $alt1) : ?>
+                        <tr>
+                            <td><?php echo htmlspecialchars($alt1['nama']); ?></td>
+                            <?php foreach ($alternatifs as $id2 => $alt2) : ?>
+                                <td>
+                                    <?php echo isset($matrix[$id1][$id2]) ? number_format($matrix[$id1][$id2], 2) : '0'; ?>
+                                </td>
+                            <?php endforeach; ?>
+                        </tr>
+                    <?php endforeach; ?>
+                <?php else : ?>
+                    <tr>
+                        <td colspan="<?php echo count($alternatifs) + 1; ?>">Tidak ada data untuk ditampilkan.</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+        </table>
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+
+</body>
+</html>

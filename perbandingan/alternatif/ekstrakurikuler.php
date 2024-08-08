@@ -1,5 +1,6 @@
 <?php
-include 'config.php';
+include '../../config.php';
+include '../../navbar.php'; 
 
 // Ambil data alternatif dari tabel alternatif
 $sql = "SELECT id_alternatif, nama, extrakurikuler FROM alternatif";
@@ -64,10 +65,21 @@ $matrix = calculate_ahp_ekstrakurikuler($alternatifs);
 
 ?>
 
-<h2>Perbandingan Alternatif Ekstrakurikuler</h2>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perbandingan Alternatif Ekstrakurikuler</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
-<table border="1">
-    <thead>
+</head>
+<body>
+
+<div class="container mt-5">
+<h2 class="mb-4">Perbandingan Alternatif Nilai Ekstrakurikuler</h2>
+<table class="table table-bordered">
+            <thead class="thead-light">
         <tr>
             <th>Alternatif</th>
             <?php foreach ($alternatifs as $alt) : ?>
@@ -94,3 +106,13 @@ $matrix = calculate_ahp_ekstrakurikuler($alternatifs);
         <?php endif; ?>
     </tbody>
 </table>
+</div>
+    
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
+
+
+
+

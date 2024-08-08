@@ -20,12 +20,12 @@
                     <a href="#" class="submenu-toggle">Perbandingan Alternatif</a>
                     <ul class="submenu-list">
                         <li><a href="perbandingan/alternatif/nilai_raport.php">Nilai Raport</a></li>
-                        <li><a href="index.php?page=ekstrakurikuler">Ekstrakurikuler</a></li>
-                        <li><a href="index.php?page=prestasi">Prestasi</a></li>
-                        <li><a href="index.php?page=absensi">Absensi</a></li>
+                        <li><a href="perbandingan/alternatif/ekstrakurikuler.php">Ekstrakurikuler</a></li>
+                        <li><a href="perbandingan/alternatif/prestasi.php">Prestasi</a></li>
+                        <li><a href="perbandingan/alternatif/absensi">Absensi</a></li>
                     </ul>
                 </li>
-                <li><a href="index.php?page=hasil">Hasil</a></li>
+                <li><a href="hasil/hasil.php">Hasil</a></li>
                 <li><a href="periode/periode.php">Periode</a></li>
             </ul>
         </nav>
