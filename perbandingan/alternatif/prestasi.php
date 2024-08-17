@@ -15,7 +15,7 @@ while ($row = $result->fetch_assoc()) {
     $alternatifs[$row['id_alternatif']] = $row;
 }
 
-// Fungsi untuk menghitung AHP
+
 function calculate_ahp_prestasi($alternatifs)
 {
     global $conn;
@@ -23,18 +23,17 @@ function calculate_ahp_prestasi($alternatifs)
     $matrix = [];
     $num_alternatif = count($alternatifs);
 
-    // Membuat matriks perbandingan berdasarkan nilai prestasi
     foreach ($alternatifs as $id1 => $alt1) {
         foreach ($alternatifs as $id2 => $alt2) {
             if ($alt2['prestasi'] != 0) {
                 $matrix[$id1][$id2] = $alt1['prestasi'] / $alt2['prestasi'];
             } else {
-                $matrix[$id1][$id2] = 0; // Menghindari pembagian dengan nol
+                $matrix[$id1][$id2] = 0; 
             }
         }
     }
 
-    // Normalisasi matriks
+ 
     $normalized_matrix = [];
     foreach ($matrix as $row_id => $row) {
         $sum = array_sum($row);
@@ -43,14 +42,14 @@ function calculate_ahp_prestasi($alternatifs)
         }
     }
 
-    // Simpan data perbandingan ke tabel
+  
     $sql = "INSERT INTO perbandingan_alternatif_prestasi (alternatif1_id, alternatif2_id, nilai)
             VALUES (?, ?, ?)";
     $stmt = $conn->prepare($sql);
 
     foreach ($matrix as $id1 => $row) {
         foreach ($row as $id2 => $value) {
-            if ($id1 != $id2) { // Menghindari perbandingan diri sendiri
+            if ($id1 != $id2) { 
                 $stmt->bind_param("iid", $id1, $id2, $value);
                 $stmt->execute();
             }
@@ -60,7 +59,7 @@ function calculate_ahp_prestasi($alternatifs)
     return $matrix;
 }
 
-// Memanggil fungsi perhitungan AHP untuk nilai prestasi
+
 $matrix = calculate_ahp_prestasi($alternatifs);
 
 ?>

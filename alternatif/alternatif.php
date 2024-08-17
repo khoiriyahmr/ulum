@@ -1,7 +1,7 @@
 <?php
 include '../config.php';
 
-// Menambah Alternatif
+
 if (isset($_POST['add_alternatif'])) {
     $nama = $_POST['nama'];
     $kelas = $_POST['kelas'];
@@ -10,28 +10,28 @@ if (isset($_POST['add_alternatif'])) {
     $prestasi = $_POST['prestasi'];
     $absensi = $_POST['absensi'];
 
-    // Tambah alternatif
+
     $sql = "INSERT INTO alternatif (nama, kelas, nilai_raport, extrakurikuler, prestasi, absensi)
             VALUES ('$nama', '$kelas', '$nilai_raport', '$extrakurikuler', '$prestasi', '$absensi')";
     $conn->query($sql);
 
-    // Dapatkan ID alternatif yang baru ditambahkan
+
     $id_alternatif = $conn->insert_id;
 
-    // Tambah data periode dengan tahun saat ini
-    $tahun_sekarang = date('Y'); // Menggunakan tahun saat ini
+
+    $tahun_sekarang = date('Y');
     $sql_periode = "INSERT INTO periode (tahun, id_alternatif) VALUES ('$tahun_sekarang', $id_alternatif)";
     $conn->query($sql_periode);
 }
 
-// Menghapus Alternatif
+
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
     $sql = "DELETE FROM alternatif WHERE id_alternatif = $id";
     $conn->query($sql);
 }
 
-// Mengedit Alternatif
+
 if (isset($_GET['edit'])) {
     $id = $_GET['edit'];
     $sql = "SELECT * FROM alternatif WHERE id_alternatif = $id";
@@ -39,7 +39,7 @@ if (isset($_GET['edit'])) {
     $alternatif = $result->fetch_assoc();
 }
 
-// Memproses Update Alternatif
+
 if (isset($_POST['edit_alternatif'])) {
     $id = $_POST['id_alternatif'];
     $nama = $_POST['nama'];
@@ -54,15 +54,15 @@ if (isset($_POST['edit_alternatif'])) {
     header("Location: alternatif.php");
 }
 
-// Menangani Filter Kelas
+
 $kelas_filter = isset($_GET['kelas']) ? $_GET['kelas'] : 'all';
 $filter_query = $kelas_filter == 'all' ? "" : "WHERE kelas = '$kelas_filter'";
 
-// Mengambil data kelas untuk dropdown
+
 $kelas_query = "SELECT DISTINCT kelas FROM alternatif";
 $kelas_result = $conn->query($kelas_query);
 
-// Mengambil data alternatif berdasarkan filter
+
 $sql = "SELECT * FROM alternatif $filter_query";
 $result = $conn->query($sql);
 ?>
@@ -82,10 +82,6 @@ $result = $conn->query($sql);
 
     <div class="container mt-4">
         <h1 class="mb-4">Manajemen Alternatif</h1>
-
-   
-
-        <!-- Formulir Tambah Alternatif -->
         <div class="mb-4">
             <h2>Tambah Alternatif</h2>
             <form action="" method="POST">
@@ -116,8 +112,6 @@ $result = $conn->query($sql);
                 <button type="submit" name="add_alternatif" class="btn btn-primary">Add</button>
             </form>
         </div>
-
-        <!-- Formulir Edit Alternatif -->
         <?php if (isset($alternatif)) : ?>
             <div class="mb-4">
                 <h2>Edit Alternatif</h2>
@@ -151,10 +145,7 @@ $result = $conn->query($sql);
                 </form>
             </div>
         <?php endif; ?>
-
-
-             <!-- Dropdown Filter Kelas -->
-             <form method="GET" class="mb-4">
+        <form method="GET" class="mb-4">
             <div class="form-group">
                 <label for="kelas">Filter Kelas:</label>
                 <select name="kelas" id="kelas" class="form-select" onchange="this.form.submit()">
@@ -172,7 +163,7 @@ $result = $conn->query($sql);
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th>Nomor</th>
                     <th>Nama</th>
                     <th>Kelas</th>
                     <th>Nilai Raport</th>
@@ -184,9 +175,10 @@ $result = $conn->query($sql);
             </thead>
             <tbody>
                 <?php
+                $no = 1;
                 while ($row = $result->fetch_assoc()) {
                     echo "<tr>";
-                    echo "<td>" . $row['id_alternatif'] . "</td>";
+                    echo "<td>" . $no++ . "</td>";
                     echo "<td>" . $row['nama'] . "</td>";
                     echo "<td>" . $row['kelas'] . "</td>";
                     echo "<td>" . $row['nilai_raport'] . "</td>";

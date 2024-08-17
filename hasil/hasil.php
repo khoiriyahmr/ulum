@@ -2,7 +2,6 @@
 include '../config.php';
 include '../navbar.php'; 
 
-// Ambil data kelas dari tabel alternatif
 $sql_kelas = "SELECT DISTINCT kelas FROM alternatif ORDER BY kelas";
 $result_kelas = $conn->query($sql_kelas);
 
@@ -15,8 +14,8 @@ while ($row = $result_kelas->fetch_assoc()) {
     $kelas_options[] = $row['kelas'];
 }
 
-// Ambil data dari tabel alternatif berdasarkan kelas yang dipilih
-$selected_class = isset($_POST['kelas']) ? $_POST['kelas'] : 'All'; // Default ke 'All'
+
+$selected_class = isset($_POST['kelas']) ? $_POST['kelas'] : 'All'; 
 
 if ($selected_class === 'All') {
     $sql_alternatif = "SELECT id_alternatif, nama, kelas FROM alternatif";
@@ -42,22 +41,20 @@ while ($row = $result_alternatif->fetch_assoc()) {
     ];
 }
 
-// Proses perhitungan AHP
-// Inisialisasi matriks perbandingan
+
 $matrix = [];
 foreach ($alternatifs as $id1 => $alt1) {
     foreach ($alternatifs as $id2 => $alt2) {
         if ($id1 != $id2) {
-            // Contoh perhitungan, misalnya hasil perbandingan
-            $nilai = rand(1, 9); // Gantilah dengan logika perhitungan AHP yang sebenarnya
+          
+            $nilai = rand(1, 9); 
             $matrix[$id1][$id2] = $nilai;
         } else {
-            $matrix[$id1][$id2] = 1; // Diagonal matriks selalu 1
+            $matrix[$id1][$id2] = 1; 
         }
     }
 }
 
-// Debugging: Tampilkan matriks perbandingan
 echo "<!DOCTYPE html>";
 echo "<html lang='en'>";
 echo "<head>";
@@ -96,19 +93,17 @@ foreach ($alternatifs as $id1 => $alt1) {
 }
 echo "</tbody></table>";
 
-// Simulasikan proses perhitungan AHP
-// Misalnya hasil akhir dihitung dari matriks perbandingan
+
 $nilai_akhir = [];
 foreach ($alternatifs as $id => $alt) {
-    // Contoh perhitungan nilai akhir, ini harus diganti dengan logika AHP yang sebenarnya
+ 
     $nilai_akhir[$id] = array_sum($matrix[$id]) / count($matrix[$id]);
 }
 
-// Masukkan hasil ke tabel 'hasil'
-foreach ($nilai_akhir as $id_alternatif => $nilai) {
-    $ranking = 0; // Inisialisasi ranking
 
-    // Tentukan ranking (ini contoh sederhana, sesuaikan dengan kebutuhan)
+foreach ($nilai_akhir as $id_alternatif => $nilai) {
+    $ranking = 0;
+
     $sql_ranking = "SELECT COUNT(*) + 1 AS ranking FROM hasil WHERE nilai_akhir > ?";
     $stmt = $conn->prepare($sql_ranking);
     $stmt->bind_param('d', $nilai);
@@ -117,14 +112,14 @@ foreach ($nilai_akhir as $id_alternatif => $nilai) {
     $row = $result->fetch_assoc();
     $ranking = $row['ranking'];
 
-    // Masukkan data ke tabel hasil
+
     $sql_insert = "INSERT INTO hasil (id_alternatif, nilai_akhir, ranking) VALUES (?, ?, ?)";
     $stmt = $conn->prepare($sql_insert);
     $stmt->bind_param('idi', $id_alternatif, $nilai, $ranking);
     $stmt->execute();
 }
 
-// Ambil data hasil perhitungan AHP untuk ditampilkan
+
 $sql = "SELECT a.nama AS alternatif_nama, b.nama AS dibandingkan_nama, h.nilai_akhir
         FROM hasil h
         JOIN alternatif a ON h.id_alternatif = a.id_alternatif
@@ -136,13 +131,13 @@ if (!$result) {
     die("Error: " . $conn->error);
 }
 
-// Matriks hasil perhitungan
+
 $matrix = [];
 while ($row = $result->fetch_assoc()) {
     $matrix[$row['alternatif_nama']][$row['dibandingkan_nama']] = $row['nilai_akhir'];
 }
 
-// Ambil data hasil perhitungan AHP dan ranking per kelas
+
 $sql = "SELECT a.nama, a.kelas, h.nilai_akhir
         FROM hasil h
         JOIN alternatif a ON h.id_alternatif = a.id_alternatif
@@ -153,7 +148,7 @@ if (!$result) {
     die("Error: " . $conn->error);
 }
 
-// Mengambil satu perwakilan per kelas
+
 $rankings = [];
 while ($row = $result->fetch_assoc()) {
     $kelas = $row['kelas'];

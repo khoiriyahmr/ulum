@@ -2,14 +2,14 @@
 include '../config.php';
 include '../navbar.php'; 
 
-// Ambil filter kelas dari parameter GET
+
 $kelas_filter = isset($_GET['kelas']) ? $_GET['kelas'] : 'all';
 
-// Query untuk mendapatkan kelas yang unik dari tabel alternatif
+
 $kelas_query = "SELECT DISTINCT kelas FROM alternatif";
 $kelas_result = $conn->query($kelas_query);
 
-// Query untuk mengambil data periode berdasarkan filter kelas
+
 $filter_query = $kelas_filter == 'all' ? "" : "AND a.kelas = '$kelas_filter'";
 $sql = "SELECT p.id_periode, p.tahun, a.nama, a.kelas 
         FROM periode p
@@ -34,7 +34,7 @@ $result = $conn->query($sql);
     <div class="container mt-5">
         <h1 class="mb-4">Daftar Periode</h1>
 
-        <!-- Dropdown Filter Kelas -->
+     
         <form method="GET" action="" class="mb-4">
             <div class="mb-3">
                 <label for="kelas" class="form-label">Filter Kelas:</label>
@@ -49,7 +49,7 @@ $result = $conn->query($sql);
             </div>
         </form>
 
-        <!-- Tabel Daftar Periode -->
+
         <table class="table table-bordered">
             <thead>
                 <tr>
