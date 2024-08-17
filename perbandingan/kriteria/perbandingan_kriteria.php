@@ -121,52 +121,93 @@ if (isset($_POST['edit_perbandingan'])) {
 <body>
     <div class="container mt-4">
         <h2>Perbandingan Kriteria</h2>
-        <form action="" method="POST">
-            <div class="mb-3">
-                <label for="kriteria1_id" class="form-label">Kriteria 1</label>
-                <select name="kriteria1_id" id="kriteria1_id" class="form-select" required>
-                    <option value="">Pilih Kriteria 1</option>
-                    <?php
-                    $sql = "SELECT * FROM kriteria";
-                    $result = $conn->query($sql);
-                    while ($row = $result->fetch_assoc()) {
-                        echo "<option value='" . $row['id_kriteria'] . "'";
-                        if (isset($perbandingan) && $perbandingan['kriteria1_id'] == $row['id_kriteria']) {
-                            echo " selected";
-                        }
-                        echo ">" . $row['nama_kriteria'] . "</option>";
-                    }
-                    ?>
-                </select>
+        <div class="row">
+            <div class="col-md-6">
+                <form action="" method="POST">
+                    <div class="mb-3">
+                        <label for="kriteria1_id" class="form-label">Kriteria 1</label>
+                        <select name="kriteria1_id" id="kriteria1_id" class="form-select" required>
+                            <option value="">Pilih Kriteria 1</option>
+                            <?php
+                            $sql = "SELECT * FROM kriteria";
+                            $result = $conn->query($sql);
+                            while ($row = $result->fetch_assoc()) {
+                                echo "<option value='" . $row['id_kriteria'] . "'";
+                                if (isset($perbandingan) && $perbandingan['kriteria1_id'] == $row['id_kriteria']) {
+                                    echo " selected";
+                                }
+                                echo ">" . $row['nama_kriteria'] . "</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="kriteria2_id" class="form-label">Kriteria 2</label>
+                        <select name="kriteria2_id" id="kriteria2_id" class="form-select" required>
+                            <option value="">Pilih Kriteria 2</option>
+                            <?php
+                            $sql = "SELECT * FROM kriteria";
+                            $result = $conn->query($sql);
+                            while ($row = $result->fetch_assoc()) {
+                                echo "<option value='" . $row['id_kriteria'] . "'";
+                                if (isset($perbandingan) && $perbandingan['kriteria2_id'] == $row['id_kriteria']) {
+                                    echo " selected";
+                                }
+                                echo ">" . $row['nama_kriteria'] . "</option>";
+                            }
+                            ?>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nilai" class="form-label">Nilai</label>
+                        <input type="text" name="nilai" id="nilai" class="form-control" placeholder="Nilai (gunakan titik sebagai pemisah desimal)" value="<?php echo isset($perbandingan) ? $perbandingan['nilai'] : ''; ?>" required>
+                    </div>
+                    <?php if (isset($perbandingan)) : ?>
+                        <input type="hidden" name="id_perbandingan" value="<?php echo $perbandingan['id_perbandingan']; ?>">
+                        <button type="submit" name="edit_perbandingan" class="btn btn-primary">Update</button>
+                    <?php else : ?>
+                        <button type="submit" name="add_perbandingan" class="btn btn-primary">Add</button>
+                    <?php endif; ?>
+                </form>
             </div>
-            <div class="mb-3">
-                <label for="kriteria2_id" class="form-label">Kriteria 2</label>
-                <select name="kriteria2_id" id="kriteria2_id" class="form-select" required>
-                    <option value="">Pilih Kriteria 2</option>
-                    <?php
-                    $sql = "SELECT * FROM kriteria";
-                    $result = $conn->query($sql);
-                    while ($row = $result->fetch_assoc()) {
-                        echo "<option value='" . $row['id_kriteria'] . "'";
-                        if (isset($perbandingan) && $perbandingan['kriteria2_id'] == $row['id_kriteria']) {
-                            echo " selected";
-                        }
-                        echo ">" . $row['nama_kriteria'] . "</option>";
-                    }
-                    ?>
-                </select>
+            <div class="col-md-6">
+                <h5 class="mt-4">Tabel Intensitas Kepentingan Metode AHP</h5>
+                <table class="table table-bordered mt-3">
+                    <thead>
+                        <tr>
+                            <th>Intensitas Kepentingan</th>
+                            <th>Definisi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Sama pentingnya dibanding dengan yang lain</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Sedikit lebih penting dibanding yang lain</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>Cukup penting dibanding dengan yang lain</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>Sangat penting dibanding dengan yang lain</td>
+                        </tr>
+                        <tr>
+                            <td>9</td>
+                            <td>Ekstrim pentingnya dibanding yang lain</td>
+                        </tr>
+                        <tr>
+                            <td>2,4,6,8</td>
+                            <td>Nilai diantara dua penilaian yang berdekatan</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="mb-3">
-                <label for="nilai" class="form-label">Nilai</label>
-                <input type="text" name="nilai" id="nilai" class="form-control" placeholder="Nilai (gunakan titik sebagai pemisah desimal)" value="<?php echo isset($perbandingan) ? $perbandingan['nilai'] : ''; ?>" required>
-            </div>
-            <?php if (isset($perbandingan)) : ?>
-                <input type="hidden" name="id_perbandingan" value="<?php echo $perbandingan['id_perbandingan']; ?>">
-                <button type="submit" name="edit_perbandingan" class="btn btn-primary">Update</button>
-            <?php else : ?>
-                <button type="submit" name="add_perbandingan" class="btn btn-primary">Add</button>
-            <?php endif; ?>
-        </form>
+        </div>
 
         <h3 class="mt-4">Daftar Perbandingan Kriteria</h3>
 
@@ -212,15 +253,12 @@ if (isset($_POST['edit_perbandingan'])) {
                                 }
 
                                 if ($value) {
-
                                     echo rtrim(rtrim(number_format($value, 8, '.', ''), '0'), '.');
                                 } else {
                                     echo $row_id == $col_id ? '1' : '0';
                                 }
                                 ?>
                             </td>
-
-
                         <?php endforeach; ?>
                     </tr>
                 <?php endforeach; ?>
