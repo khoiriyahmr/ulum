@@ -2,13 +2,10 @@
 include '../config.php';
 include '../navbar.php'; 
 
-
 $kelas_filter = isset($_GET['kelas']) ? $_GET['kelas'] : 'all';
-
 
 $kelas_query = "SELECT DISTINCT kelas FROM alternatif";
 $kelas_result = $conn->query($kelas_query);
-
 
 $filter_query = $kelas_filter == 'all' ? "" : "AND a.kelas = '$kelas_filter'";
 $sql = "SELECT p.id_periode, p.tahun, a.nama, a.kelas 
@@ -27,14 +24,12 @@ $result = $conn->query($sql);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Periode</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
 </head>
 
 <body>
     <div class="container mt-5">
         <h1 class="mb-4">Daftar Periode</h1>
 
-     
         <form method="GET" action="" class="mb-4">
             <div class="mb-3">
                 <label for="kelas" class="form-label">Filter Kelas:</label>
@@ -49,20 +44,22 @@ $result = $conn->query($sql);
             </div>
         </form>
 
-
         <table class="table table-bordered">
             <thead>
                 <tr>
-                    <th>ID Periode</th>
+                    <th>No</th>
                     <th>Tahun</th>
                     <th>Nama Alternatif</th>
                     <th>Kelas</th>
                 </tr>
             </thead>
             <tbody>
-                <?php while ($row = $result->fetch_assoc()) : ?>
+                <?php 
+                $no = 1; 
+                while ($row = $result->fetch_assoc()) : 
+                ?>
                     <tr>
-                        <td><?php echo htmlspecialchars($row['id_periode']); ?></td>
+                        <td><?php echo $no++; ?></td> 
                         <td><?php echo htmlspecialchars($row['tahun']); ?></td>
                         <td><?php echo htmlspecialchars($row['nama']); ?></td>
                         <td><?php echo htmlspecialchars($row['kelas']); ?></td>
@@ -72,9 +69,6 @@ $result = $conn->query($sql);
         </table>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-
-
-
 </body>
 
 </html>
