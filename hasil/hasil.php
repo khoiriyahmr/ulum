@@ -1,6 +1,7 @@
 <?php
 include '../config.php';
-include '../navbar.php'; 
+include '../navbar.php';
+
 
 $sql_kelas = "SELECT DISTINCT kelas FROM alternatif ORDER BY kelas";
 $result_kelas = $conn->query($sql_kelas);
@@ -14,16 +15,16 @@ while ($row = $result_kelas->fetch_assoc()) {
     $kelas_options[] = $row['kelas'];
 }
 
+$selected_class = isset($_POST['kelas']) ? $_POST['kelas'] : 'All';
 
-$selected_class = isset($_POST['kelas']) ? $_POST['kelas'] : 'All'; 
 
 if ($selected_class === 'All') {
-    $sql_alternatif = "SELECT id_alternatif, nama, kelas FROM alternatif";
+    $sql_alternatif = "SELECT id_alternatif, nama, kelas, absensi FROM alternatif";
     $stmt = $conn->prepare($sql_alternatif);
 } else {
-    $sql_alternatif = "SELECT id_alternatif, nama, kelas FROM alternatif WHERE kelas = ?";
+    $sql_alternatif = "SELECT id_alternatif, nama, kelas, absensi FROM alternatif WHERE kelas = ?";
     $stmt = $conn->prepare($sql_alternatif);
-    $stmt->bind_param('s', $selected_class);
+    $stmt->bind_param('i', $selected_class);
 }
 
 $stmt->execute();
@@ -37,7 +38,8 @@ $alternatifs = [];
 while ($row = $result_alternatif->fetch_assoc()) {
     $alternatifs[$row['id_alternatif']] = [
         'nama' => $row['nama'],
-        'kelas' => $row['kelas']
+        'kelas' => $row['kelas'],
+        'absensi' => $row['absensi']
     ];
 }
 
@@ -46,58 +48,26 @@ $matrix = [];
 foreach ($alternatifs as $id1 => $alt1) {
     foreach ($alternatifs as $id2 => $alt2) {
         if ($id1 != $id2) {
-          
-            $nilai = rand(1, 9); 
-            $matrix[$id1][$id2] = $nilai;
+            $matrix[$id1][$id2] = $alt1['absensi'] / $alt2['absensi'];
         } else {
-            $matrix[$id1][$id2] = 1; 
+            $matrix[$id1][$id2] = 1;
         }
     }
 }
 
-echo "<!DOCTYPE html>";
-echo "<html lang='en'>";
-echo "<head>";
-echo "<meta charset='UTF-8'>";
-echo "<meta name='viewport' content='width=device-width, initial-scale=1.0'>";
-echo "<title>Matriks Perbandingan</title>";
-echo "<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet' integrity='sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH' crossorigin='anonymous'>";
-echo "</head>";
-echo "<body>";
-echo "<div class='container mt-5'>";
-echo "<h2>Matriks Perbandingan</h2>";
-echo "<form method='post' class='mb-3'>";
-echo "<div class='mb-3'>";
-echo "<label for='kelas' class='form-label'>Pilih Kelas:</label>";
-echo "<select name='kelas' id='kelas' class='form-select' onchange='this.form.submit()'>";
-foreach ($kelas_options as $kelas) {
-    $selected = ($kelas == $selected_class) ? 'selected' : '';
-    echo "<option value='" . htmlspecialchars($kelas) . "' $selected>" . htmlspecialchars($kelas) . "</option>";
-}
-echo "</select>";
-echo "</div>";
-echo "</form>";
 
-echo "<table class='table table-bordered'>";
-echo "<thead><tr><th>Alternatif</th>";
-foreach ($alternatifs as $alt) {
-    echo "<th>" . htmlspecialchars($alt['nama']) . "</th>";
-}
-echo "</tr></thead><tbody>";
-foreach ($alternatifs as $id1 => $alt1) {
-    echo "<tr><td>" . htmlspecialchars($alt1['nama']) . "</td>";
-    foreach ($alternatifs as $id2 => $alt2) {
-        echo "<td>" . (isset($matrix[$id1][$id2]) ? number_format($matrix[$id1][$id2], 2) : '0') . "</td>";
+$normalized_matrix = [];
+foreach ($matrix as $row_id => $row) {
+    $sum = array_sum($row);
+    foreach ($row as $col_id => $value) {
+        $normalized_matrix[$row_id][$col_id] = $sum != 0 ? $value / $sum : 0;
     }
-    echo "</tr>";
 }
-echo "</tbody></table>";
 
 
 $nilai_akhir = [];
 foreach ($alternatifs as $id => $alt) {
- 
-    $nilai_akhir[$id] = array_sum($matrix[$id]) / count($matrix[$id]);
+    $nilai_akhir[$id] = array_sum($normalized_matrix[$id]) / count($normalized_matrix[$id]);
 }
 
 
@@ -112,49 +82,34 @@ foreach ($nilai_akhir as $id_alternatif => $nilai) {
     $row = $result->fetch_assoc();
     $ranking = $row['ranking'];
 
-
-    $sql_insert = "INSERT INTO hasil (id_alternatif, nilai_akhir, ranking) VALUES (?, ?, ?)";
+    $sql_insert = "INSERT INTO hasil (id_alternatif, nilai_akhir, ranking) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE nilai_akhir = VALUES(nilai_akhir), ranking = VALUES(ranking)";
     $stmt = $conn->prepare($sql_insert);
     $stmt->bind_param('idi', $id_alternatif, $nilai, $ranking);
     $stmt->execute();
 }
 
 
-$sql = "SELECT a.nama AS alternatif_nama, b.nama AS dibandingkan_nama, h.nilai_akhir
-        FROM hasil h
-        JOIN alternatif a ON h.id_alternatif = a.id_alternatif
-        JOIN alternatif b ON h.id_alternatif = b.id_alternatif
-        ORDER BY a.nama, b.nama";
+$sql = "SELECT nama, kelas, nilai_akhir
+        FROM alternatif
+        JOIN hasil ON alternatif.id_alternatif = hasil.id_alternatif
+        WHERE (kelas, nilai_akhir) IN (
+            SELECT kelas, MAX(nilai_akhir) AS nilai_akhir
+            FROM alternatif
+            JOIN hasil ON alternatif.id_alternatif = hasil.id_alternatif
+            GROUP BY kelas
+        )
+        ORDER BY kelas, nilai_akhir DESC";
+
 $result = $conn->query($sql);
 
 if (!$result) {
     die("Error: " . $conn->error);
 }
-
-
-$matrix = [];
-while ($row = $result->fetch_assoc()) {
-    $matrix[$row['alternatif_nama']][$row['dibandingkan_nama']] = $row['nilai_akhir'];
-}
-
-
-$sql = "SELECT a.nama, a.kelas, h.nilai_akhir
-        FROM hasil h
-        JOIN alternatif a ON h.id_alternatif = a.id_alternatif
-        ORDER BY a.kelas, h.nilai_akhir DESC";
-$result = $conn->query($sql);
-
-if (!$result) {
-    die("Error: " . $conn->error);
-}
-
 
 $rankings = [];
 while ($row = $result->fetch_assoc()) {
     $kelas = $row['kelas'];
-    if (!isset($rankings[$kelas])) {
-        $rankings[$kelas] = $row;
-    }
+    $rankings[$kelas] = $row;
 }
 ?>
 
@@ -166,7 +121,6 @@ while ($row = $result->fetch_assoc()) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hasil Perhitungan AHP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
 </head>
 
 <body>
@@ -192,9 +146,6 @@ while ($row = $result->fetch_assoc()) {
         </table>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-
-
-
 </body>
 
 </html>

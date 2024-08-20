@@ -1,121 +1,118 @@
 <?php
-include '../../config.php';
-include '../../navbar.php'; 
+include '../config.php';
+include '../navbar.php';
 
+// Fetch classes
+$sql_kelas = "SELECT DISTINCT kelas FROM alternatif ORDER BY kelas";
+$result_kelas = $conn->query($sql_kelas);
 
-$sql = "SELECT id_alternatif, nama, prestasi FROM alternatif";
+if (!$result_kelas) {
+    die("Error: " . $conn->error);
+}
+
+$kelas_options = ['All'];
+while ($row = $result_kelas->fetch_assoc()) {
+    $kelas_options[] = $row['kelas'];
+}
+
+$selected_class = isset($_POST['kelas']) ? $_POST['kelas'] : 'All';
+
+// Fetch alternatives based on selected class
+if ($selected_class === 'All') {
+    $sql_alternatif = "SELECT id_alternatif, nama, kelas, nilai_raport, extrakurikuler, prestasi, absensi FROM alternatif";
+    $stmt = $conn->prepare($sql_alternatif);
+} else {
+    $sql_alternatif = "SELECT id_alternatif, nama, kelas, nilai_raport, extrakurikuler, prestasi, absensi FROM alternatif WHERE kelas = ?";
+    $stmt = $conn->prepare($sql_alternatif);
+    $stmt->bind_param('i', $selected_class);
+}
+
+$stmt->execute();
+$result_alternatif = $stmt->get_result();
+
+if (!$result_alternatif) {
+    die("Error: " . $conn->error);
+}
+
+$alternatifs = [];
+while ($row = $result_alternatif->fetch_assoc()) {
+    $alternatifs[$row['id_alternatif']] = $row;
+}
+
+// Calculate and save rankings
+foreach ($alternatifs as $id => $alt) {
+    $nilai_akhir = ($alt['nilai_raport'] + $alt['extrakurikuler'] + $alt['prestasi'] + $alt['absensi']) / 4;
+
+    // Insert or update results into the 'hasil' table
+    $sql_insert = "INSERT INTO hasil (id_alternatif, nilai_akhir, ranking) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE nilai_akhir = VALUES(nilai_akhir)";
+    $stmt = $conn->prepare($sql_insert);
+
+    // Calculate ranking
+    $ranking = 0;
+    $sql_ranking = "SELECT COUNT(*) + 1 AS ranking FROM hasil WHERE nilai_akhir > ?";
+    $stmt_ranking = $conn->prepare($sql_ranking);
+    $stmt_ranking->bind_param('d', $nilai_akhir);
+    $stmt_ranking->execute();
+    $result_ranking = $stmt_ranking->get_result();
+    $row_ranking = $result_ranking->fetch_assoc();
+    $ranking = $row_ranking['ranking'];
+
+    $stmt->bind_param('idi', $id, $nilai_akhir, $ranking);
+    $stmt->execute();
+}
+
+// Retrieve and display rankings
+$sql = "SELECT nama, kelas, nilai_akhir FROM hasil
+        JOIN alternatif ON hasil.id_alternatif = alternatif.id_alternatif
+        ORDER BY kelas, nilai_akhir DESC";
 $result = $conn->query($sql);
 
 if (!$result) {
     die("Error: " . $conn->error);
 }
 
-$alternatifs = [];
+$rankings = [];
 while ($row = $result->fetch_assoc()) {
-    $alternatifs[$row['id_alternatif']] = $row;
+    $kelas = $row['kelas'];
+    if (!isset($rankings[$kelas])) {
+        $rankings[$kelas] = $row;
+    }
 }
-
-
-function calculate_ahp_prestasi($alternatifs)
-{
-    global $conn;
-
-    $matrix = [];
-    $num_alternatif = count($alternatifs);
-
-    foreach ($alternatifs as $id1 => $alt1) {
-        foreach ($alternatifs as $id2 => $alt2) {
-            if ($alt2['prestasi'] != 0) {
-                $matrix[$id1][$id2] = $alt1['prestasi'] / $alt2['prestasi'];
-            } else {
-                $matrix[$id1][$id2] = 0; 
-            }
-        }
-    }
-
- 
-    $normalized_matrix = [];
-    foreach ($matrix as $row_id => $row) {
-        $sum = array_sum($row);
-        foreach ($row as $col_id => $value) {
-            $normalized_matrix[$row_id][$col_id] = $sum != 0 ? $value / $sum : 0;
-        }
-    }
-
-  
-    $sql = "INSERT INTO perbandingan_alternatif_prestasi (alternatif1_id, alternatif2_id, nilai)
-            VALUES (?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-
-    foreach ($matrix as $id1 => $row) {
-        foreach ($row as $id2 => $value) {
-            if ($id1 != $id2) { 
-                $stmt->bind_param("iid", $id1, $id2, $value);
-                $stmt->execute();
-            }
-        }
-    }
-
-    return $matrix;
-}
-
-
-$matrix = calculate_ahp_prestasi($alternatifs);
-
 ?>
-
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perbandingan Alternatif Nilai Prestasi</title>
+    <title>Hasil Perhitungan AHP</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
 </head>
+
 <body>
-    
-<div class="container mt-5">
-<h2 class="mb-4">Perbandingan Alternatif Nilai Prestasi</h2>
-<table class="table table-bordered">
-            <thead class="thead-light">
-        <tr>
-            <th>Alternatif</th>
-            <?php foreach ($alternatifs as $alt) : ?>
-                <th><?php echo htmlspecialchars($alt['nama']); ?></th>
-            <?php endforeach; ?>
-        </tr>
-    </thead>
-    <tbody>
-        <?php if (!empty($matrix)) : ?>
-            <?php foreach ($alternatifs as $id1 => $alt1) : ?>
+    <div class="container mt-5">
+        <h2>Perwakilan Tiap Kelas Berdasarkan Ranking</h2>
+        <table class="table table-bordered">
+            <thead>
                 <tr>
-                    <td><?php echo htmlspecialchars($alt1['nama']); ?></td>
-                    <?php foreach ($alternatifs as $id2 => $alt2) : ?>
-                        <td>
-                            <?php echo isset($matrix[$id1][$id2]) ? number_format($matrix[$id1][$id2], 2) : '0'; ?>
-                        </td>
-                    <?php endforeach; ?>
+                    <th>Nama</th>
+                    <th>Kelas</th>
+                    <th>Nilai Akhir</th>
                 </tr>
-            <?php endforeach; ?>
-        <?php else : ?>
-            <tr>
-                <td colspan="<?php echo count($alternatifs) + 1; ?>">Tidak ada data untuk ditampilkan.</td>
-            </tr>
-        <?php endif; ?>
-    </tbody>
-</table>
-</div>
-
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+            </thead>
+            <tbody>
+                <?php foreach ($rankings as $ranking) : ?>
+                    <tr>
+                        <td><?php echo htmlspecialchars($ranking['nama']); ?></td>
+                        <td><?php echo htmlspecialchars($ranking['kelas']); ?></td>
+                        <td><?php echo number_format($ranking['nilai_akhir'], 2); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
+
 </html>
-
-
-
-
-
-
-
