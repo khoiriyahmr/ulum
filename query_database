@@ -1,14 +1,6 @@
-CREATE TABLE kriteria (
-    id_kriteria INT AUTO_INCREMENT PRIMARY KEY,
-    nama_kriteria VARCHAR(255) NOT NULL,
-    bobot FLOAT NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 CREATE TABLE periode (
     id_periode INT AUTO_INCREMENT PRIMARY KEY,
-    tahun YEAR NOT NULL,
-    id_alternatif INT,
-    FOREIGN KEY (id_alternatif) REFERENCES alternatif(id_alternatif) ON DELETE CASCADE
+    tahun YEAR NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE alternatif (
@@ -16,11 +8,17 @@ CREATE TABLE alternatif (
     nama VARCHAR(255),
     kelas INT,
     nilai_raport DECIMAL(5,2),
-    extrakurikuler DECIMAL(5,2),
+    ekstrakurikuler DECIMAL(5,2),
     prestasi DECIMAL(5,2),
     absensi DECIMAL(5,2),
     id_periode INT,
     FOREIGN KEY (id_periode) REFERENCES periode(id_periode) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+CREATE TABLE kriteria (
+    id_kriteria INT AUTO_INCREMENT PRIMARY KEY,
+    nama_kriteria VARCHAR(255) NOT NULL,
+    bobot FLOAT NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE perbandingan_alternatif_raport (
@@ -71,15 +69,14 @@ CREATE TABLE perbandingan_kriteria (
     id_perbandingan INT AUTO_INCREMENT PRIMARY KEY,
     kriteria1_id INT NOT NULL,
     kriteria2_id INT NOT NULL,
-    nilai FLOAT NOT NULL
+    nilai FLOAT NOT NULL,
+    FOREIGN KEY (kriteria1_id) REFERENCES kriteria(id_kriteria) ON DELETE CASCADE,
+    FOREIGN KEY (kriteria2_id) REFERENCES kriteria(id_kriteria) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
 
 CREATE TABLE admin (
     id_admin INT AUTO_INCREMENT PRIMARY KEY,
-      nama VARCHAR(255),
-          email VARCHAR(255),
-              password VARCHAR(255)
-
-
-) 
+    nama VARCHAR(255),
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password VARCHAR(255) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

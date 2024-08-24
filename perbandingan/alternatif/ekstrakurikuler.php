@@ -2,18 +2,7 @@
 include '../../config.php';
 include '../../navbar.php';
 
-
-function classify_value($value)
-{
-    if ($value > 5) return 5;
-    elseif ($value == 4) return 4;
-    elseif ($value == 3) return 3;
-    elseif ($value == 2) return 2;
-    else return 1;
-}
-
-
-$sql = "SELECT id_alternatif, nama, extrakurikuler FROM alternatif";
+$sql = "SELECT id_alternatif, nama, nilai_raport, extrakurikuler, prestasi, absensi FROM alternatif";
 $result = $conn->query($sql);
 
 if (!$result) {
@@ -24,10 +13,12 @@ $alternatifs = [];
 while ($row = $result->fetch_assoc()) {
     $alternatifs[$row['id_alternatif']] = [
         'nama' => $row['nama'],
-        'extrakurikuler' => classify_value($row['extrakurikuler'])
+        'nilai_raport' => $row['nilai_raport'],
+        'extrakurikuler' => $row['extrakurikuler'],
+        'prestasi' => $row['prestasi'],
+        'absensi' => $row['absensi']
     ];
 }
-
 
 function calculate_comparison_matrix($alternatifs, $criteria)
 {
@@ -47,40 +38,9 @@ function calculate_comparison_matrix($alternatifs, $criteria)
     return $matrix;
 }
 
-
-function calculate_normalized_matrix_and_weights($matrix)
-{
-    $num_alternatif = count($matrix);
-    $normalized_matrix = [];
-    $weights = [];
-
-
-    for ($j = 0; $j < $num_alternatif; $j++) {
-        $column_sum = 0;
-        for ($i = 0; $i < $num_alternatif; $i++) {
-            $column_sum += $matrix[$i][$j] ?? 0;
-        }
-        for ($i = 0; $i < $num_alternatif; $i++) {
-            $normalized_matrix[$i][$j] = $column_sum != 0 ? ($matrix[$i][$j] ?? 0) / $column_sum : 0;
-        }
-    }
-
-
-    for ($i = 0; $i < $num_alternatif; $i++) {
-        $row_sum = array_sum($normalized_matrix[$i] ?? []);
-        $weights[$i] = $row_sum / $num_alternatif;
-    }
-
-    return [$normalized_matrix, $weights];
-}
-
-
 $criteria = 'extrakurikuler';
 
-
 $matrix = calculate_comparison_matrix($alternatifs, $criteria);
-
-list($normalized_matrix, $weights) = calculate_normalized_matrix_and_weights($matrix);
 
 ?>
 <!DOCTYPE html>

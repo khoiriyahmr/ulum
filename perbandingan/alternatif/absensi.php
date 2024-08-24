@@ -2,119 +2,79 @@
 include '../../config.php';
 include '../../navbar.php';
 
-
-function classify_value($value)
-{
-    if ($value > 5) return 1;
-    elseif ($value == 4) return 2;
-    elseif ($value == 3) return 3;
-    elseif ($value == 2) return 4;
-    else return 5;
-}
-
-
-$sql = "SELECT id_alternatif, nama, absensi FROM alternatif";
+$sql = "SELECT id_alternatif, nama, nilai_raport, extrakurikuler, prestasi, absensi FROM alternatif";
 $result = $conn->query($sql);
 
 if (!$result) {
     die("Error: " . $conn->error);
 }
 
-
 $alternatifs = [];
 while ($row = $result->fetch_assoc()) {
     $alternatifs[$row['id_alternatif']] = [
         'nama' => $row['nama'],
-        'absensi' => classify_value($row['absensi'])
+        'nilai_raport' => $row['nilai_raport'],
+        'extrakurikuler' => $row['extrakurikuler'],
+        'prestasi' => $row['prestasi'],
+        'absensi' => $row['absensi']
     ];
 }
 
-
-function calculate_ahp_absensi($alternatifs)
+function calculate_comparison_matrix($alternatifs, $criteria)
 {
-    global $conn;
-
     $matrix = [];
-    $num_alternatif = count($alternatifs);
-
-
-    foreach ($alternatifs as $id1 => $alt1) {
-        foreach ($alternatifs as $id2 => $alt2) {
-            if ($alt2['absensi'] != 0) {
-                $matrix[$id1][$id2] = $alt1['absensi'] / $alt2['absensi'];
-            } else {
-                $matrix[$id1][$id2] = 0;
-            }
-        }
-    }
-
-
-    $normalized_matrix = [];
-    foreach ($matrix as $row_id => $row) {
-        $sum = array_sum($row);
-        foreach ($row as $col_id => $value) {
-            $normalized_matrix[$row_id][$col_id] = $sum != 0 ? $value / $sum : 0;
-        }
-    }
-
-    $sql = "INSERT INTO perbandingan_alternatif_absensi (alternatif1_id, alternatif2_id, nilai)
-            VALUES (?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-
-    foreach ($matrix as $id1 => $row) {
-        foreach ($row as $id2 => $value) {
+    $keys = array_keys($alternatifs);
+    foreach ($keys as $id1) {
+        foreach ($keys as $id2) {
             if ($id1 != $id2) {
-                $stmt->bind_param("iid", $id1, $id2, $value);
-                $stmt->execute();
+                $value1 = $alternatifs[$id1][$criteria] ?? 1;
+                $value2 = $alternatifs[$id2][$criteria] ?? 1;
+                $matrix[$id1][$id2] = $value2 != 0 ? $value1 / $value2 : 1;
+            } else {
+                $matrix[$id1][$id2] = 1;
             }
         }
     }
-
     return $matrix;
 }
 
-// Hitung matriks perbandingan berdasarkan absensi
-$matrix = calculate_ahp_absensi($alternatifs);
+$criteria = 'absensi';
+
+$matrix = calculate_comparison_matrix($alternatifs, $criteria);
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perbandingan Alternatif Nilai Absensi</title>
+    <title>Perbandingan Alternatif Absensi</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
 
 <body>
     <div class="container mt-5">
-        <h2 class="mb-4">Perbandingan Alternatif Nilai Absensi</h2>
+        <h2 class="mb-4">Perbandingan Alternatif Absensi</h2>
+
         <table class="table table-bordered">
             <thead class="thead-light">
                 <tr>
                     <th>Alternatif</th>
-                    <?php foreach ($alternatifs as $alt) : ?>
+                    <?php foreach ($alternatifs as $id => $alt) : ?>
                         <th><?php echo htmlspecialchars($alt['nama']); ?></th>
                     <?php endforeach; ?>
                 </tr>
             </thead>
             <tbody>
-                <?php if (!empty($matrix)) : ?>
-                    <?php foreach ($alternatifs as $id1 => $alt1) : ?>
-                        <tr>
-                            <td><?php echo htmlspecialchars($alt1['nama']); ?></td>
-                            <?php foreach ($alternatifs as $id2 => $alt2) : ?>
-                                <td><?php echo isset($matrix[$id1][$id2]) ? number_format($matrix[$id1][$id2], 2) : '0'; ?></td>
-                            <?php endforeach; ?>
-                        </tr>
-                    <?php endforeach; ?>
-                <?php else : ?>
+                <?php foreach ($alternatifs as $id1 => $alt1) : ?>
                     <tr>
-                        <td colspan="<?php echo count($alternatifs) + 1; ?>">Tidak ada data untuk ditampilkan.</td>
+                        <td><?php echo htmlspecialchars($alt1['nama']); ?></td>
+                        <?php foreach ($alternatifs as $id2 => $alt2) : ?>
+                            <td><?php echo number_format($matrix[$id1][$id2] ?? 0, 4); ?></td>
+                        <?php endforeach; ?>
                     </tr>
-                <?php endif; ?>
+                <?php endforeach; ?>
             </tbody>
         </table>
     </div>

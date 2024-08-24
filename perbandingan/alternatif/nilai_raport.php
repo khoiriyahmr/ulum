@@ -2,14 +2,12 @@
 include '../../config.php';
 include '../../navbar.php';
 
-
 $sql = "SELECT id_alternatif, nama, nilai_raport, extrakurikuler, prestasi, absensi FROM alternatif";
 $result = $conn->query($sql);
 
 if (!$result) {
     die("Error: " . $conn->error);
 }
-
 
 $alternatifs = [];
 while ($row = $result->fetch_assoc()) {
@@ -21,7 +19,6 @@ while ($row = $result->fetch_assoc()) {
         'absensi' => $row['absensi']
     ];
 }
-
 
 function calculate_comparison_matrix($alternatifs, $criteria)
 {
@@ -41,13 +38,11 @@ function calculate_comparison_matrix($alternatifs, $criteria)
     return $matrix;
 }
 
-
 function calculate_normalized_matrix_and_weights($matrix)
 {
     $num_alternatif = count($matrix);
     $normalized_matrix = [];
     $weights = [];
-
 
     for ($j = 0; $j < $num_alternatif; $j++) {
         $column_sum = 0;
@@ -59,7 +54,6 @@ function calculate_normalized_matrix_and_weights($matrix)
         }
     }
 
-
     for ($i = 0; $i < $num_alternatif; $i++) {
         $row_sum = array_sum($normalized_matrix[$i] ?? []);
         $weights[$i] = $row_sum / $num_alternatif;
@@ -68,15 +62,11 @@ function calculate_normalized_matrix_and_weights($matrix)
     return [$normalized_matrix, $weights];
 }
 
-
 $criteria = 'nilai_raport';
-
 
 $matrix = calculate_comparison_matrix($alternatifs, $criteria);
 
-
 list($normalized_matrix, $weights) = calculate_normalized_matrix_and_weights($matrix);
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -91,7 +81,6 @@ list($normalized_matrix, $weights) = calculate_normalized_matrix_and_weights($ma
 <body>
     <div class="container mt-5">
         <h2 class="mb-4">Perbandingan Alternatif Nilai Rata-Rata Raport</h2>
-
 
         <table class="table table-bordered">
             <thead class="thead-light">
