@@ -1,36 +1,71 @@
 <?php
 include '../config.php';
 
+function updateComparison($conn, $table_name, $alternatif_id, $column_name)
+{
+    // Hapus perbandingan yang ada untuk alternatif ini
+    $sql_delete = "DELETE FROM $table_name WHERE alternatif1_id = $alternatif_id OR alternatif2_id = $alternatif_id";
+    $conn->query($sql_delete);
+
+    // Ambil semua alternatif
+    $sql = "SELECT id_alternatif, $column_name FROM alternatif";
+    $result = $conn->query($sql);
+    $alternatifs = $result->fetch_all(MYSQLI_ASSOC);
+
+    foreach ($alternatifs as $i => $alternatif1) {
+        foreach ($alternatifs as $j => $alternatif2) {
+            if ($i < $j) {
+                $nilai1 = $alternatif1[$column_name];
+                $nilai2 = $alternatif2[$column_name];
+
+                // Hitung nilai perbandingan
+                $nilai = $nilai1 / $nilai2;
+
+                // Simpan ke tabel perbandingan
+                $sql_insert = "INSERT INTO $table_name (alternatif1_id, alternatif2_id, nilai)
+                               VALUES ({$alternatif1['id_alternatif']}, {$alternatif2['id_alternatif']}, $nilai)";
+                $conn->query($sql_insert);
+            }
+        }
+    }
+}
 
 if (isset($_POST['add_alternatif'])) {
     $nama = $_POST['nama'];
     $kelas = $_POST['kelas'];
-    $nilai_raport = $_POST['nilai_raport'];
-    $extrakurikuler = $_POST['extrakurikuler'];
-    $prestasi = $_POST['prestasi'];
-    $absensi = $_POST['absensi'];
-
+    $nilai_raport = (int)$_POST['nilai_raport'];
+    $extrakurikuler = (int)$_POST['extrakurikuler'];
+    $prestasi = (int)$_POST['prestasi'];
+    $absensi = (int)$_POST['absensi'];
 
     $sql = "INSERT INTO alternatif (nama, kelas, nilai_raport, extrakurikuler, prestasi, absensi)
             VALUES ('$nama', '$kelas', '$nilai_raport', '$extrakurikuler', '$prestasi', '$absensi')";
     $conn->query($sql);
 
-
     $id_alternatif = $conn->insert_id;
 
+    // Update tabel perbandingan
+    updateComparison($conn, 'perbandingan_alternatif_raport', $id_alternatif, 'nilai_raport');
+    updateComparison($conn, 'perbandingan_alternatif_ekstrakurikuler', $id_alternatif, 'extrakurikuler');
+    updateComparison($conn, 'perbandingan_alternatif_prestasi', $id_alternatif, 'prestasi');
+    updateComparison($conn, 'perbandingan_alternatif_absensi', $id_alternatif, 'absensi');
 
-    $tahun_sekarang = date('Y');
-    $sql_periode = "INSERT INTO periode (tahun, id_alternatif) VALUES ('$tahun_sekarang', $id_alternatif)";
-    $conn->query($sql_periode);
+    header("Location: alternatif.php");
 }
-
 
 if (isset($_GET['delete'])) {
     $id = $_GET['delete'];
     $sql = "DELETE FROM alternatif WHERE id_alternatif = $id";
     $conn->query($sql);
-}
 
+    // Update tabel perbandingan
+    updateComparison($conn, 'perbandingan_alternatif_raport', $id, 'nilai_raport');
+    updateComparison($conn, 'perbandingan_alternatif_ekstrakurikuler', $id, 'extrakurikuler');
+    updateComparison($conn, 'perbandingan_alternatif_prestasi', $id, 'prestasi');
+    updateComparison($conn, 'perbandingan_alternatif_absensi', $id, 'absensi');
+
+    header("Location: alternatif.php");
+}
 
 if (isset($_GET['edit'])) {
     $id = $_GET['edit'];
@@ -39,164 +74,114 @@ if (isset($_GET['edit'])) {
     $alternatif = $result->fetch_assoc();
 }
 
-
 if (isset($_POST['edit_alternatif'])) {
     $id = $_POST['id_alternatif'];
     $nama = $_POST['nama'];
     $kelas = $_POST['kelas'];
-    $nilai_raport = $_POST['nilai_raport'];
-    $extrakurikuler = $_POST['extrakurikuler'];
-    $prestasi = $_POST['prestasi'];
-    $absensi = $_POST['absensi'];
+    $nilai_raport = (int)$_POST['nilai_raport'];
+    $extrakurikuler = (int)$_POST['extrakurikuler'];
+    $prestasi = (int)$_POST['prestasi'];
+    $absensi = (int)$_POST['absensi'];
     $sql = "UPDATE alternatif SET nama='$nama', kelas='$kelas', nilai_raport='$nilai_raport', 
             extrakurikuler='$extrakurikuler', prestasi='$prestasi', absensi='$absensi' WHERE id_alternatif=$id";
     $conn->query($sql);
+
+    // Update tabel perbandingan
+    updateComparison($conn, 'perbandingan_alternatif_raport', $id, 'nilai_raport');
+    updateComparison($conn, 'perbandingan_alternatif_ekstrakurikuler', $id, 'extrakurikuler');
+    updateComparison($conn, 'perbandingan_alternatif_prestasi', $id, 'prestasi');
+    updateComparison($conn, 'perbandingan_alternatif_absensi', $id, 'absensi');
+
     header("Location: alternatif.php");
 }
 
-
-$kelas_filter = isset($_GET['kelas']) ? $_GET['kelas'] : 'all';
-$filter_query = $kelas_filter == 'all' ? "" : "WHERE kelas = '$kelas_filter'";
-
-
-$kelas_query = "SELECT DISTINCT kelas FROM alternatif";
-$kelas_result = $conn->query($kelas_query);
-
-
-$sql = "SELECT * FROM alternatif $filter_query";
+// Menampilkan data alternatif
+$sql = "SELECT * FROM alternatif";
 $result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Manajemen Alternatif</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 
-<body>
-    <?php include '../navbar.php'; ?>
+<body class="p-4">
 
-    <div class="container mt-4">
-        <h1 class="mb-4">Manajemen Alternatif</h1>
-        <div class="mb-4">
-            <h2>Tambah Alternatif</h2>
-            <form action="" method="POST">
-                <div class="mb-3">
-                    <label for="nama" class="form-label">Nama</label>
-                    <input type="text" id="nama" name="nama" class="form-control" placeholder="Nama" required>
-                </div>
-                <div class="mb-3">
-                    <label for="kelas" class="form-label">Kelas</label>
-                    <input type="text" id="kelas" name="kelas" class="form-control" placeholder="Kelas" required>
-                </div>
-                <div class="mb-3">
-                    <label for="nilai_raport" class="form-label">Nilai Raport</label>
-                    <input type="number" id="nilai_raport" name="nilai_raport" class="form-control" step="0.01" placeholder="Nilai Raport" required>
-                </div>
-                <div class="mb-3">
-                    <label for="extrakurikuler" class="form-label">Nilai Ekstrakurikuler</label>
-                    <input type="number" id="extrakurikuler" name="extrakurikuler" class="form-control" step="0.01" placeholder="Nilai Ekstrakurikuler" required>
-                </div>
-                <div class="mb-3">
-                    <label for="prestasi" class="form-label">Nilai Prestasi</label>
-                    <input type="number" id="prestasi" name="prestasi" class="form-control" step="0.01" placeholder="Nilai Prestasi" required>
-                </div>
-                <div class="mb-3">
-                    <label for="absensi" class="form-label">Nilai Absensi</label>
-                    <input type="number" id="absensi" name="absensi" class="form-control" step="0.01" placeholder="Nilai Absensi" required>
-                </div>
-                <button type="submit" name="add_alternatif" class="btn btn-primary">Add</button>
-            </form>
+    <h1>Manajemen Alternatif</h1>
+
+    <form action="alternatif.php" method="post">
+        <input type="hidden" name="id_alternatif" value="<?= isset($alternatif) ? $alternatif['id_alternatif'] : '' ?>">
+        <div class="mb-3">
+            <label for="nama" class="form-label">Nama</label>
+            <input type="text" name="nama" id="nama" class="form-control" value="<?= isset($alternatif) ? $alternatif['nama'] : '' ?>" required>
         </div>
-        <?php if (isset($alternatif)) : ?>
-            <div class="mb-4">
-                <h2>Edit Alternatif</h2>
-                <form action="" method="POST">
-                    <input type="hidden" name="id_alternatif" value="<?php echo $alternatif['id_alternatif']; ?>">
-                    <div class="mb-3">
-                        <label for="nama" class="form-label">Nama</label>
-                        <input type="text" id="nama" name="nama" class="form-control" value="<?php echo $alternatif['nama']; ?>" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="kelas" class="form-label">Kelas</label>
-                        <input type="text" id="kelas" name="kelas" class="form-control" value="<?php echo $alternatif['kelas']; ?>" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="nilai_raport" class="form-label">Nilai Raport</label>
-                        <input type="number" id="nilai_raport" name="nilai_raport" class="form-control" value="<?php echo $alternatif['nilai_raport']; ?>" step="0.01" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="extrakurikuler" class="form-label">Nilai Ekstrakurikuler</label>
-                        <input type="number" id="extrakurikuler" name="extrakurikuler" class="form-control" value="<?php echo $alternatif['extrakurikuler']; ?>" step="0.01" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="prestasi" class="form-label">Nilai Prestasi</label>
-                        <input type="number" id="prestasi" name="prestasi" class="form-control" value="<?php echo $alternatif['prestasi']; ?>" step="0.01" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="absensi" class="form-label">Nilai Absensi</label>
-                        <input type="number" id="absensi" name="absensi" class="form-control" value="<?php echo $alternatif['absensi']; ?>" step="0.01" required>
-                    </div>
-                    <button type="submit" name="edit_alternatif" class="btn btn-warning">Update</button>
-                </form>
-            </div>
+        <div class="mb-3">
+            <label for="kelas" class="form-label">Kelas</label>
+            <input type="text" name="kelas" id="kelas" class="form-control" value="<?= isset($alternatif) ? $alternatif['kelas'] : '' ?>" required>
+        </div>
+        <div class="mb-3">
+            <label for="nilai_raport" class="form-label">Nilai Raport</label>
+            <input type="number" name="nilai_raport" id="nilai_raport" class="form-control" value="<?= isset($alternatif) ? $alternatif['nilai_raport'] : '' ?>" required>
+        </div>
+        <div class="mb-3">
+            <label for="extrakurikuler" class="form-label">Ekstrakurikuler</label>
+            <input type="number" name="extrakurikuler" id="extrakurikuler" class="form-control" value="<?= isset($alternatif) ? $alternatif['extrakurikuler'] : '' ?>" required>
+        </div>
+        <div class="mb-3">
+            <label for="prestasi" class="form-label">Prestasi</label>
+            <input type="number" name="prestasi" id="prestasi" class="form-control" value="<?= isset($alternatif) ? $alternatif['prestasi'] : '' ?>" required>
+        </div>
+        <div class="mb-3">
+            <label for="absensi" class="form-label">Absensi</label>
+            <input type="number" name="absensi" id="absensi" class="form-control" value="<?= isset($alternatif) ? $alternatif['absensi'] : '' ?>" required>
+        </div>
+
+        <?php if (isset($alternatif)): ?>
+            <button type="submit" name="edit_alternatif" class="btn btn-primary">Update</button>
+            <a href="alternatif.php" class="btn btn-secondary">Cancel</a>
+        <?php else: ?>
+            <button type="submit" name="add_alternatif" class="btn btn-success">Add</button>
         <?php endif; ?>
-        <form method="GET" class="mb-4">
-            <div class="form-group">
-                <label for="kelas">Filter Kelas:</label>
-                <select name="kelas" id="kelas" class="form-select" onchange="this.form.submit()">
-                    <option value="all" <?php echo $kelas_filter == 'all' ? 'selected' : ''; ?>>All</option>
-                    <?php while ($kelas_row = $kelas_result->fetch_assoc()) : ?>
-                        <option value="<?php echo $kelas_row['kelas']; ?>" <?php echo $kelas_row['kelas'] == $kelas_filter ? 'selected' : ''; ?>>
-                            <?php echo $kelas_row['kelas']; ?>
-                        </option>
-                    <?php endwhile; ?>
-                </select>
-            </div>
-        </form>
+    </form>
 
-        <h2>Daftar Alternatif</h2>
-        <table class="table table-striped">
-            <thead>
+    <h2 class="mt-4">Daftar Alternatif</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nama</th>
+                <th>Kelas</th>
+                <th>Nilai Raport</th>
+                <th>Ekstrakurikuler</th>
+                <th>Prestasi</th>
+                <th>Absensi</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php while ($row = $result->fetch_assoc()): ?>
                 <tr>
-                    <th>Nomor</th>
-                    <th>Nama</th>
-                    <th>Kelas</th>
-                    <th>Nilai Raport</th>
-                    <th>Nilai Ekstrakurikuler</th>
-                    <th>Nilai Prestasi</th>
-                    <th>Nilai Absensi</th>
-                    <th>Aksi</th>
+                    <td><?= $row['id_alternatif'] ?></td>
+                    <td><?= $row['nama'] ?></td>
+                    <td><?= $row['kelas'] ?></td>
+                    <td><?= $row['nilai_raport'] ?></td>
+                    <td><?= $row['extrakurikuler'] ?></td>
+                    <td><?= $row['prestasi'] ?></td>
+                    <td><?= $row['absensi'] ?></td>
+                    <td>
+                        <a href="alternatif.php?edit=<?= $row['id_alternatif'] ?>" class="btn btn-warning btn-sm">Edit</a>
+                        <a href="alternatif.php?delete=<?= $row['id_alternatif'] ?>" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                <?php
-                $no = 1;
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>";
-                    echo "<td>" . $no++ . "</td>";
-                    echo "<td>" . $row['nama'] . "</td>";
-                    echo "<td>" . $row['kelas'] . "</td>";
-                    echo "<td>" . $row['nilai_raport'] . "</td>";
-                    echo "<td>" . $row['extrakurikuler'] . "</td>";
-                    echo "<td>" . $row['prestasi'] . "</td>";
-                    echo "<td>" . $row['absensi'] . "</td>";
-                    echo "<td>
-                            <a href='alternatif.php?edit=" . $row['id_alternatif'] . "' class='btn btn-warning btn-sm'>Edit</a>
-                            <a href='alternatif.php?delete=" . $row['id_alternatif'] . "' class='btn btn-danger btn-sm' onclick=\"return confirm('Anda yakin ingin menghapus alternatif ini?')\">Delete</a>
-                          </td>";
-                    echo "</tr>";
-                }
-                ?>
-            </tbody>
-        </table>
-    </div>
+            <?php endwhile; ?>
+        </tbody>
+    </table>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 
 </html>

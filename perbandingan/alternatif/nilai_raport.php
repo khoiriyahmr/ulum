@@ -2,7 +2,8 @@
 include '../../config.php';
 include '../../navbar.php';
 
-$sql = "SELECT id_alternatif, nama, nilai_raport, extrakurikuler, prestasi, absensi FROM alternatif";
+// Mengambil data alternatif dari database
+$sql = "SELECT id_alternatif, nama, nilai_raport FROM alternatif";
 $result = $conn->query($sql);
 
 if (!$result) {
@@ -13,13 +14,11 @@ $alternatifs = [];
 while ($row = $result->fetch_assoc()) {
     $alternatifs[$row['id_alternatif']] = [
         'nama' => $row['nama'],
-        'nilai_raport' => $row['nilai_raport'],
-        'extrakurikuler' => $row['extrakurikuler'],
-        'prestasi' => $row['prestasi'],
-        'absensi' => $row['absensi']
+        'nilai_raport' => $row['nilai_raport']
     ];
 }
 
+// Fungsi untuk menghitung matriks perbandingan
 function calculate_comparison_matrix($alternatifs, $criteria)
 {
     $matrix = [];
@@ -38,35 +37,9 @@ function calculate_comparison_matrix($alternatifs, $criteria)
     return $matrix;
 }
 
-function calculate_normalized_matrix_and_weights($matrix)
-{
-    $num_alternatif = count($matrix);
-    $normalized_matrix = [];
-    $weights = [];
-
-    for ($j = 0; $j < $num_alternatif; $j++) {
-        $column_sum = 0;
-        for ($i = 0; $i < $num_alternatif; $i++) {
-            $column_sum += $matrix[$i][$j] ?? 0;
-        }
-        for ($i = 0; $i < $num_alternatif; $i++) {
-            $normalized_matrix[$i][$j] = $column_sum != 0 ? ($matrix[$i][$j] ?? 0) / $column_sum : 0;
-        }
-    }
-
-    for ($i = 0; $i < $num_alternatif; $i++) {
-        $row_sum = array_sum($normalized_matrix[$i] ?? []);
-        $weights[$i] = $row_sum / $num_alternatif;
-    }
-
-    return [$normalized_matrix, $weights];
-}
-
+// Set criteria to 'nilai_raport'
 $criteria = 'nilai_raport';
-
 $matrix = calculate_comparison_matrix($alternatifs, $criteria);
-
-list($normalized_matrix, $weights) = calculate_normalized_matrix_and_weights($matrix);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -74,13 +47,13 @@ list($normalized_matrix, $weights) = calculate_normalized_matrix_and_weights($ma
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Perbandingan Alternatif</title>
+    <title>Perbandingan Alternatif Nilai Raport</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 </head>
 
 <body>
     <div class="container mt-5">
-        <h2 class="mb-4">Perbandingan Alternatif Nilai Rata-Rata Raport</h2>
+        <h2 class="mb-4">Perbandingan Alternatif Nilai Raport</h2>
 
         <table class="table table-bordered">
             <thead class="thead-light">

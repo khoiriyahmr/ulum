@@ -8,7 +8,7 @@ CREATE TABLE alternatif (
     nama VARCHAR(255),
     kelas INT,
     nilai_raport DECIMAL(5,2),
-    ekstrakurikuler DECIMAL(5,2),
+    extrakurikuler DECIMAL(5,2),
     prestasi DECIMAL(5,2),
     absensi DECIMAL(5,2),
     id_periode INT,
@@ -18,7 +18,7 @@ CREATE TABLE alternatif (
 CREATE TABLE kriteria (
     id_kriteria INT AUTO_INCREMENT PRIMARY KEY,
     nama_kriteria VARCHAR(255) NOT NULL,
-    bobot FLOAT NOT NULL
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE perbandingan_alternatif_raport (
