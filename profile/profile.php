@@ -20,9 +20,6 @@ include '../navbar.php';
         <div class="row justify-content-center">
             <div class="col-md-6">
 
-                <div class="text-center mb-4">
-                    <img src="path_to_your_image.jpg" alt="Profile Picture" class="img-fluid rounded-circle" style="width: 150px; height: 150px;">
-                </div>
 
                 <div class="mb-3">
                     <label for="name" class="form-label">Name</label>
