@@ -1,13 +1,18 @@
 <?php
 include '../config.php';
-include '../navbar.php'; 
+include '../navbar.php';
+
 
 $kelas_filter = isset($_GET['kelas']) ? $_GET['kelas'] : 'all';
+
 
 $kelas_query = "SELECT DISTINCT kelas FROM alternatif";
 $kelas_result = $conn->query($kelas_query);
 
+
 $filter_query = $kelas_filter == 'all' ? "" : "AND a.kelas = '$kelas_filter'";
+
+
 $sql = "SELECT p.id_periode, p.tahun, a.nama, a.kelas 
         FROM periode p
         JOIN alternatif a ON p.id_alternatif = a.id_alternatif
@@ -54,17 +59,23 @@ $result = $conn->query($sql);
                 </tr>
             </thead>
             <tbody>
-                <?php 
-                $no = 1; 
-                while ($row = $result->fetch_assoc()) : 
+                <?php
+                $no = 1;
+                if ($result->num_rows > 0) {
+                    while ($row = $result->fetch_assoc()) :
                 ?>
-                    <tr>
-                        <td><?php echo $no++; ?></td> 
-                        <td><?php echo htmlspecialchars($row['tahun']); ?></td>
-                        <td><?php echo htmlspecialchars($row['nama']); ?></td>
-                        <td><?php echo htmlspecialchars($row['kelas']); ?></td>
-                    </tr>
-                <?php endwhile; ?>
+                        <tr>
+                            <td><?php echo $no++; ?></td>
+                            <td><?php echo htmlspecialchars($row['tahun']); ?></td>
+                            <td><?php echo htmlspecialchars($row['nama']); ?></td>
+                            <td><?php echo htmlspecialchars($row['kelas']); ?></td>
+                        </tr>
+                <?php
+                    endwhile;
+                } else {
+                    echo '<tr><td colspan="4" class="text-center">Tidak ada data yang tersedia</td></tr>';
+                }
+                ?>
             </tbody>
         </table>
     </div>

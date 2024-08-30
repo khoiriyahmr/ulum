@@ -4,11 +4,11 @@ include '../config.php';
 
 function updateComparison($conn, $table_name, $alternatif_id, $column_name)
 {
-    // Hapus perbandingan yang ada untuk alternatif ini
+
     $sql_delete = "DELETE FROM $table_name WHERE alternatif1_id = $alternatif_id OR alternatif2_id = $alternatif_id";
     $conn->query($sql_delete);
 
-    // Ambil semua alternatif
+
     $sql = "SELECT id_alternatif, $column_name FROM alternatif";
     $result = $conn->query($sql);
     $alternatifs = $result->fetch_all(MYSQLI_ASSOC);
@@ -19,10 +19,10 @@ function updateComparison($conn, $table_name, $alternatif_id, $column_name)
                 $nilai1 = $alternatif1[$column_name];
                 $nilai2 = $alternatif2[$column_name];
 
-                // Hitung nilai perbandingan
+
                 $nilai = $nilai1 / $nilai2;
 
-                // Simpan ke tabel perbandingan
+
                 $sql_insert = "INSERT INTO $table_name (alternatif1_id, alternatif2_id, nilai)
                                VALUES ({$alternatif1['id_alternatif']}, {$alternatif2['id_alternatif']}, $nilai)";
                 $conn->query($sql_insert);
@@ -45,7 +45,7 @@ if (isset($_POST['add_alternatif'])) {
 
     $id_alternatif = $conn->insert_id;
 
-    // Update tabel perbandingan
+
     updateComparison($conn, 'perbandingan_alternatif_raport', $id_alternatif, 'nilai_raport');
     updateComparison($conn, 'perbandingan_alternatif_ekstrakurikuler', $id_alternatif, 'extrakurikuler');
     updateComparison($conn, 'perbandingan_alternatif_prestasi', $id_alternatif, 'prestasi');
@@ -59,7 +59,6 @@ if (isset($_GET['delete'])) {
     $sql = "DELETE FROM alternatif WHERE id_alternatif = $id";
     $conn->query($sql);
 
-    // Update tabel perbandingan
     updateComparison($conn, 'perbandingan_alternatif_raport', $id, 'nilai_raport');
     updateComparison($conn, 'perbandingan_alternatif_ekstrakurikuler', $id, 'extrakurikuler');
     updateComparison($conn, 'perbandingan_alternatif_prestasi', $id, 'prestasi');
@@ -87,7 +86,7 @@ if (isset($_POST['edit_alternatif'])) {
             extrakurikuler='$extrakurikuler', prestasi='$prestasi', absensi='$absensi' WHERE id_alternatif=$id";
     $conn->query($sql);
 
-    // Update tabel perbandingan
+
     updateComparison($conn, 'perbandingan_alternatif_raport', $id, 'nilai_raport');
     updateComparison($conn, 'perbandingan_alternatif_ekstrakurikuler', $id, 'extrakurikuler');
     updateComparison($conn, 'perbandingan_alternatif_prestasi', $id, 'prestasi');
@@ -96,7 +95,7 @@ if (isset($_POST['edit_alternatif'])) {
     header("Location: alternatif.php");
 }
 
-// Menampilkan data alternatif
+
 $sql = "SELECT * FROM alternatif";
 $result = $conn->query($sql);
 ?>
@@ -154,7 +153,7 @@ $result = $conn->query($sql);
     <table class="table table-bordered">
         <thead>
             <tr>
-                <th>ID</th>
+                <th>No</th>
                 <th>Nama</th>
                 <th>Kelas</th>
                 <th>Nilai Raport</th>
@@ -165,9 +164,11 @@ $result = $conn->query($sql);
             </tr>
         </thead>
         <tbody>
-            <?php while ($row = $result->fetch_assoc()): ?>
+            <?php
+            $no = 1;
+            while ($row = $result->fetch_assoc()): ?>
                 <tr>
-                    <td><?= $row['id_alternatif'] ?></td>
+                    <td><?= $no++ ?></td> 
                     <td><?= $row['nama'] ?></td>
                     <td><?= $row['kelas'] ?></td>
                     <td><?= $row['nilai_raport'] ?></td>

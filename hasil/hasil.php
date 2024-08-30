@@ -2,7 +2,7 @@
 include '../config.php';
 include '../navbar.php';
 
-// Mengambil data alternatif dari database
+
 $sql = "SELECT id_alternatif, nama, nilai_raport, extrakurikuler, prestasi, absensi FROM alternatif";
 $result = $conn->query($sql);
 
@@ -21,7 +21,7 @@ while ($row = $result->fetch_assoc()) {
     ];
 }
 
-// Bobot untuk setiap kriteria
+
 $weights = [
     'nilai_raport' => 0.25,
     'extrakurikuler' => 0.25,
@@ -29,7 +29,7 @@ $weights = [
     'absensi' => 0.25
 ];
 
-// Fungsi untuk menghitung nilai akhir
+
 function calculate_final_score($alternatif, $weights)
 {
     return ($alternatif['nilai_raport'] * $weights['nilai_raport']) +
@@ -38,17 +38,17 @@ function calculate_final_score($alternatif, $weights)
         ($alternatif['absensi'] * $weights['absensi']);
 }
 
-// Hitung nilai akhir untuk setiap alternatif
+
 $final_scores = [];
 foreach ($alternatifs as $id => $alt) {
     $final_scores[$id] = calculate_final_score($alt, $weights);
 }
 
-// Hapus hasil yang ada sebelumnya
+
 $conn->query("DELETE FROM hasil");
 
-// Simpan hasil perhitungan ke dalam tabel hasil
-arsort($final_scores); // Urutkan nilai akhir secara menurun
+
+arsort($final_scores);
 $ranking = 1;
 foreach ($final_scores as $id => $score) {
     $stmt = $conn->prepare("INSERT INTO hasil (id_alternatif, nilai_akhir, ranking) VALUES (?, ?, ?)");
@@ -73,7 +73,7 @@ foreach ($final_scores as $id => $score) {
         <h2 class="mb-4">Hasil Perbandingan Alternatif</h2>
 
         <?php
-        // Ambil hasil dari tabel hasil
+
         $sql = "SELECT a.nama, h.nilai_akhir, h.ranking 
                 FROM hasil h 
                 JOIN alternatif a ON h.id_alternatif = a.id_alternatif 

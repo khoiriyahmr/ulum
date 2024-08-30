@@ -2,7 +2,7 @@
 include '../../config.php';
 include '../../navbar.php';
 
-// Mengambil data alternatif dari database
+
 $sql = "SELECT id_alternatif, nama, nilai_raport FROM alternatif";
 $result = $conn->query($sql);
 
@@ -18,7 +18,7 @@ while ($row = $result->fetch_assoc()) {
     ];
 }
 
-// Fungsi untuk menghitung matriks perbandingan
+
 function calculate_comparison_matrix($alternatifs, $criteria)
 {
     $matrix = [];
@@ -37,7 +37,7 @@ function calculate_comparison_matrix($alternatifs, $criteria)
     return $matrix;
 }
 
-// Set criteria to 'nilai_raport'
+
 $criteria = 'nilai_raport';
 $matrix = calculate_comparison_matrix($alternatifs, $criteria);
 ?>
