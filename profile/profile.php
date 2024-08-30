@@ -1,32 +1,32 @@
 <?php
 session_start();
 include '../navbar.php';
-include '../config.php'; // Sertakan koneksi ke database
+include '../config.php';
 
-// Cek apakah pengguna sudah login
+
 if (!isset($_SESSION['id_admin'])) {
-    // Redirect ke halaman login jika belum login
+
     header("Location: login.php");
     exit;
 }
 
-// Ambil ID admin dari sesi
+
 $id_admin = $_SESSION['id_admin'];
 
-// Ambil data admin dari database berdasarkan ID
+
 $sql = "SELECT * FROM admin WHERE id_admin = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $id_admin);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Periksa apakah data admin ditemukan
+
 if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $nama = $row['nama'];
     $email = $row['email'];
 } else {
-    // Jika data tidak ditemukan, set default value atau redirect
+
     $nama = "Nama tidak ditemukan";
     $email = "Email tidak ditemukan";
 }
@@ -64,7 +64,7 @@ $conn->close();
 
                 <div class="d-grid gap-2 mb-3">
                     <a href="edit_profile.php" class="btn btn-primary">Edit Profile</a>
-                    <a href="logout.php" class="btn btn-danger">Logout</a>
+                    <a href="../login.php" class="btn btn-danger">Logout</a>
                 </div>
             </div>
         </div>

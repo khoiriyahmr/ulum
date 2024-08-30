@@ -1,4 +1,5 @@
 <?php
+include '../navbar.php';
 include '../config.php';
 
 function updateComparison($conn, $table_name, $alternatif_id, $column_name)
