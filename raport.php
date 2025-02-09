@@ -134,13 +134,13 @@ $matrix = calculate_comparison_matrix($alternatifs, $criteria);
                                 </ul>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-check-box"></i><span>Hasil</span></a>
+                                <a href="hasil.php"><i class="ti-check-box"></i><span>Rangking</span></a>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-calendar"></i><span>Periode</span></a>
+                                <a href="periode.php"><i class="ti-calendar"></i><span>Periode</span></a>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-user"></i><span>Profile</span></a>
+                                <a href="profile.php"><i class="ti-user"></i><span>Profile</span></a>
                             </li>
                         </ul>
                     </nav>

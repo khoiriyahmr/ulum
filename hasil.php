@@ -134,7 +134,7 @@ foreach ($final_scores as $id => $score) {
                                 <a href="kriteria.php"><i class="ti-pencil-alt"></i><span>Kriteria</span></a>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-view-list"></i><span>Alternatif</span></a>
+                                <a href="alternatif.php"><i class="ti-view-list"></i><span>Alternatif</span></a>
                             </li>
                             <li>
                                 <a href="perbandingan_kriteria.php"><i class="ti-exchange-vertical"></i><span>Perbandingan Kriteria</span></a>
@@ -151,13 +151,13 @@ foreach ($final_scores as $id => $score) {
                                 </ul>
                             </li>
                             <li class="active">
-                                <a href="pendaftaran.php"><i class="ti-check-box"></i><span>Hasil</span></a>
+                                <a href="hasil.php"><i class="ti-check-box"></i><span>Rangking</span></a>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-calendar"></i><span>Periode</span></a>
+                                <a href="periode.php"><i class="ti-calendar"></i><span>Periode</span></a>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-user"></i><span>Profile</span></a>
+                                <a href="profile.php"><i class="ti-user"></i><span>Profile</span></a>
                             </li>
                         </ul>
                     </nav>
@@ -202,7 +202,7 @@ foreach ($final_scores as $id => $score) {
 
             <div class="main-content-inner my-4">
 
-                <h2 class="mb-4">Hasil Perbandingan Alternatif</h2>
+                <h2 class="mb-4">Hasil Rangking</h2>
 
                 <?php
 
@@ -221,7 +221,7 @@ foreach ($final_scores as $id => $score) {
                     <thead class="thead-light">
                         <tr>
                             <th>Ranking</th>
-                            <th>Alternatif</th>
+                            <th>Nama</th>
                             <th>Nilai Akhir</th>
                         </tr>
                     </thead>

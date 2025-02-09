@@ -39,19 +39,28 @@ if (isset($_POST['add_alternatif'])) {
     $prestasi = (int)$_POST['prestasi'];
     $absensi = (int)$_POST['absensi'];
 
-    $sql = "INSERT INTO alternatif (nama, kelas, nilai_raport, extrakurikuler, prestasi, absensi)
-            VALUES ('$nama', '$kelas', '$nilai_raport', '$extrakurikuler', '$prestasi', '$absensi')";
-    $conn->query($sql);
+    $stmt = $conn->prepare("INSERT INTO alternatif (nama, kelas, nilai_raport, extrakurikuler, prestasi, absensi) VALUES (?, ?, ?, ?, ?, ?)");
+    if ($stmt === false) {
+        die("Error preparing statement: " . $conn->error);
+    }
 
-    $id_alternatif = $conn->insert_id;
+    $stmt->bind_param("ssiiii", $nama, $kelas, $nilai_raport, $extrakurikuler, $prestasi, $absensi);
 
+    if ($stmt->execute()) {
+        $id_alternatif = $stmt->insert_id;
 
-    updateComparison($conn, 'perbandingan_alternatif_raport', $id_alternatif, 'nilai_raport');
-    updateComparison($conn, 'perbandingan_alternatif_ekstrakurikuler', $id_alternatif, 'extrakurikuler');
-    updateComparison($conn, 'perbandingan_alternatif_prestasi', $id_alternatif, 'prestasi');
-    updateComparison($conn, 'perbandingan_alternatif_absensi', $id_alternatif, 'absensi');
+        updateComparison($conn, 'perbandingan_alternatif_raport', $id_alternatif, 'nilai_raport');
+        updateComparison($conn, 'perbandingan_alternatif_ekstrakurikuler', $id_alternatif, 'extrakurikuler');
+        updateComparison($conn, 'perbandingan_alternatif_prestasi', $id_alternatif, 'prestasi');
+        updateComparison($conn, 'perbandingan_alternatif_absensi', $id_alternatif, 'absensi');
 
-    header("Location: alternatif.php");
+        header("Location: alternatif.php");
+        exit();
+    } else {
+        echo "Error: " . $stmt->error;
+    }
+
+    $stmt->close();
 }
 
 if (isset($_GET['delete'])) {
@@ -95,8 +104,7 @@ if (isset($_POST['edit_alternatif'])) {
     header("Location: alternatif.php");
 }
 
-
-$sql = "SELECT * FROM alternatif";
+$sql = "SELECT * FROM alternatif ORDER BY id_alternatif DESC";
 $result = $conn->query($sql);
 ?>
 
@@ -190,13 +198,13 @@ $result = $conn->query($sql);
                                 </ul>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-check-box"></i><span>Hasil</span></a>
+                                <a href="hasil.php"><i class="ti-check-box"></i><span>Rangking</span></a>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-calendar"></i><span>Periode</span></a>
+                                <a href="periode.php"><i class="ti-calendar"></i><span>Periode</span></a>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-user"></i><span>Profile</span></a>
+                                <a href="profile.php"><i class="ti-user"></i><span>Profile</span></a>
                             </li>
                         </ul>
                     </nav>

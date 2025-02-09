@@ -116,36 +116,36 @@ $conn->close();
                     <nav>
                         <ul class="metismenu" id="menu">
                             <li>
-                                <a href="home.php"><i class="ti-dashboard"></i><span>Dashboard</span></a>
+                                <a href="../home.php"><i class="ti-dashboard"></i><span>Dashboard</span></a>
                             </li>
                             <li>
-                                <a href="kriteria.php"><i class="ti-pencil-alt"></i><span>Kriteria</span></a>
+                                <a href="../kriteria.php"><i class="ti-pencil-alt"></i><span>Kriteria</span></a>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-view-list"></i><span>Alternatif</span></a>
+                                <a href="../alternatif.php"><i class="ti-view-list"></i><span>Alternatif</span></a>
                             </li>
                             <li>
-                                <a href="perbandingan_kriteria.php"><i class="ti-exchange-vertical"></i><span>Perbandingan Kriteria</span></a>
+                                <a href="../perbandingan_kriteria.php"><i class="ti-exchange-vertical"></i><span>Perbandingan Kriteria</span></a>
                             </li>
                             <li>
                                 <a href="#" aria-expanded="false">
                                     <i class="ti-bar-chart"></i><span>Perbandingan Alternatif</span><span class="caret"></span>
                                 </a>
                                 <ul aria-expanded="false" class="collapse">
-                                    <li><a href="raport.php"><i class="ti-file"></i><span style="margin-left: 5px;">Nilai Raport</span></a></li>
-                                    <li><a href="ekstra.php"><i class="ti-plus"></i><span style="margin-left: 5px;">Ekstrakurikuler</span></a></li>
-                                    <li><a href="edit_admin.php"><i class="ti-pencil"></i><span style="margin-left: 5px;">Prestasi</span></a></li>
-                                    <li><a href="absensi.php"><i class="ti-close"></i><span style="margin-left: 5px;">Absensi</span></a></li>
+                                    <li><a href="../raport.php"><i class="ti-file"></i><span style="margin-left: 5px;">Nilai Raport</span></a></li>
+                                    <li><a href="../ekstra.php"><i class="ti-plus"></i><span style="margin-left: 5px;">Ekstrakurikuler</span></a></li>
+                                    <li><a href="../prestasi.php"><i class="ti-pencil"></i><span style="margin-left: 5px;">Prestasi</span></a></li>
+                                    <li><a href="../absensi.php"><i class="ti-close"></i><span style="margin-left: 5px;">Absensi</span></a></li>
                                 </ul>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-check-box"></i><span>Hasil</span></a>
+                                <a href="../hasil.php"><i class="ti-check-box"></i><span>Rangking</span></a>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-calendar"></i><span>Periode</span></a>
+                                <a href="../periode.php"><i class="ti-calendar"></i><span>Periode</span></a>
                             </li>
                             <li class="active">
-                                <a href="pendaftaran.php"><i class="ti-user"></i><span>Profile</span></a>
+                                <a href="../profile.php"><i class="ti-user"></i><span>Profile</span></a>
                             </li>
                         </ul>
                     </nav>
@@ -222,7 +222,7 @@ $conn->close();
             <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
             <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
         </div>
-        <?php include('footer.html'); ?>
+        <?php include('../footer.html'); ?>
     </div>
     <script src="../assets/js/vendor/jquery-2.2.4.min.js"></script>
     <script src="../assets/js/popper.min.js"></script>

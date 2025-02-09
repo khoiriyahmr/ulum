@@ -93,7 +93,7 @@ $result = $conn->query($sql);
                                 <a href="kriteria.php"><i class="ti-pencil-alt"></i><span>Kriteria</span></a>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-view-list"></i><span>Alternatif</span></a>
+                                <a href="alternatif.php"><i class="ti-view-list"></i><span>Alternatif</span></a>
                             </li>
                             <li>
                                 <a href="perbandingan_kriteria.php"><i class="ti-exchange-vertical"></i><span>Perbandingan Kriteria</span></a>
@@ -105,18 +105,18 @@ $result = $conn->query($sql);
                                 <ul aria-expanded="false" class="collapse">
                                     <li><a href="raport.php"><i class="ti-file"></i><span style="margin-left: 5px;">Nilai Raport</span></a></li>
                                     <li><a href="ekstra.php"><i class="ti-plus"></i><span style="margin-left: 5px;">Ekstrakurikuler</span></a></li>
-                                    <li><a href="edit_admin.php"><i class="ti-pencil"></i><span style="margin-left: 5px;">Prestasi</span></a></li>
+                                    <li><a href="prestasi.php"><i class="ti-pencil"></i><span style="margin-left: 5px;">Prestasi</span></a></li>
                                     <li><a href="absensi.php"><i class="ti-close"></i><span style="margin-left: 5px;">Absensi</span></a></li>
                                 </ul>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-check-box"></i><span>Hasil</span></a>
+                                <a href="hasil.php"><i class="ti-check-box"></i><span>Rangking</span></a>
                             </li>
                             <li class="active">
-                                <a href="pendaftaran.php"><i class="ti-calendar"></i><span>Periode</span></a>
+                                <a href="periode.php"><i class="ti-calendar"></i><span>Periode</span></a>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-user"></i><span>Profile</span></a>
+                                <a href="profile.php"><i class="ti-user"></i><span>Profile</span></a>
                             </li>
                         </ul>
                     </nav>

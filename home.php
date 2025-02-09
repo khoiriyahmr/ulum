@@ -86,7 +86,7 @@
                                 </ul>
                             </li>
                             <li>
-                                <a href="hasil.php"><i class="ti-check-box"></i><span>Hasil</span></a>
+                                <a href="hasil.php"><i class="ti-check-box"></i><span>Rangking</span></a>
                             </li>
                             <li>
                                 <a href="periode.php"><i class="ti-calendar"></i><span>Periode</span></a>

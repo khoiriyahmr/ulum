@@ -119,18 +119,18 @@ $conn->close();
                                     <li><a href="raport.php"><i class="ti-file"></i><span style="margin-left: 5px;">Nilai Raport</span></a></li>
                                     <li"><a href="ekstra.php"><i class="ti-plus"></i><span style="margin-left: 5px;">Ekstrakurikuler</span></a>
                             </li>
-                            <li><a href="edit_admin.php"><i class="ti-pencil"></i><span style="margin-left: 5px;">Prestasi</span></a></li>
+                            <li><a href="prestasi.php"><i class="ti-pencil"></i><span style="margin-left: 5px;">Prestasi</span></a></li>
                             <li><a href="absensi.php"><i class="ti-close"></i><span style="margin-left: 5px;">Absensi</span></a></li>
                         </ul>
                         </li>
                         <li>
-                            <a href="pendaftaran.php"><i class="ti-check-box"></i><span>Hasil</span></a>
+                            <a href="hasil.php"><i class="ti-check-box"></i><span>Rangking</span></a>
                         </li>
                         <li>
-                            <a href="pendaftaran.php"><i class="ti-calendar"></i><span>Periode</span></a>
+                            <a href="periode.php"><i class="ti-calendar"></i><span>Periode</span></a>
                         </li>
                         <li class="active">
-                            <a href="pendaftaran.php"><i class="ti-user"></i><span>Profile</span></a>
+                            <a href="profile.php"><i class="ti-user"></i><span>Profile</span></a>
                         </li>
                         </ul>
                     </nav>
@@ -192,7 +192,7 @@ $conn->close();
 
                         <div class="d-grid gap-2 mb-3">
                             <a href="profile/edit_profile.php" class="btn btn-primary">Edit Profile</a>
-                            <a href="../login.php" class="btn btn-danger">Logout</a>
+                            <a href="login.php" class="btn btn-danger">Logout</a>
                         </div>
                     </div>
                 </div>
