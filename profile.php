@@ -106,7 +106,7 @@ $conn->close();
                                 <a href="kriteria.php"><i class="ti-pencil-alt"></i><span>Kriteria</span></a>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-view-list"></i><span>Alternatif</span></a>
+                                <a href="alternatif.php"><i class="ti-view-list"></i><span>Alternatif</span></a>
                             </li>
                             <li>
                                 <a href="perbandingan_kriteria.php"><i class="ti-exchange-vertical"></i><span>Perbandingan Kriteria</span></a>

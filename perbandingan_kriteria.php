@@ -401,6 +401,7 @@ if (isset($_POST['edit_perbandingan'])) {
     </div>
     <?php include('footer.html'); ?>
     </div>
+
     <script src="assets/js/vendor/jquery-2.2.4.min.js"></script>
     <script src="assets/js/popper.min.js"></script>
     <script src="assets/js/bootstrap.min.js"></script>
@@ -428,5 +429,6 @@ if (isset($_POST['edit_perbandingan'])) {
     <script src="assets/js/plugins.js"></script>
     <script src="assets/js/scripts.js"></script>
 </body>
+
 
 </html>
