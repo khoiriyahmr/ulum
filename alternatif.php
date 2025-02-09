@@ -1,3 +1,107 @@
+<?php
+
+include 'config.php';
+
+function updateComparison($conn, $table_name, $alternatif_id, $column_name)
+{
+
+    $sql_delete = "DELETE FROM $table_name WHERE alternatif1_id = $alternatif_id OR alternatif2_id = $alternatif_id";
+    $conn->query($sql_delete);
+
+
+    $sql = "SELECT id_alternatif, $column_name FROM alternatif";
+    $result = $conn->query($sql);
+    $alternatifs = $result->fetch_all(MYSQLI_ASSOC);
+
+    foreach ($alternatifs as $i => $alternatif1) {
+        foreach ($alternatifs as $j => $alternatif2) {
+            if ($i < $j) {
+                $nilai1 = $alternatif1[$column_name];
+                $nilai2 = $alternatif2[$column_name];
+
+
+                $nilai = $nilai1 / $nilai2;
+
+
+                $sql_insert = "INSERT INTO $table_name (alternatif1_id, alternatif2_id, nilai)
+                               VALUES ({$alternatif1['id_alternatif']}, {$alternatif2['id_alternatif']}, $nilai)";
+                $conn->query($sql_insert);
+            }
+        }
+    }
+}
+
+if (isset($_POST['add_alternatif'])) {
+    $nama = $_POST['nama'];
+    $kelas = $_POST['kelas'];
+    $nilai_raport = (int)$_POST['nilai_raport'];
+    $extrakurikuler = (int)$_POST['extrakurikuler'];
+    $prestasi = (int)$_POST['prestasi'];
+    $absensi = (int)$_POST['absensi'];
+
+    $sql = "INSERT INTO alternatif (nama, kelas, nilai_raport, extrakurikuler, prestasi, absensi)
+            VALUES ('$nama', '$kelas', '$nilai_raport', '$extrakurikuler', '$prestasi', '$absensi')";
+    $conn->query($sql);
+
+    $id_alternatif = $conn->insert_id;
+
+
+    updateComparison($conn, 'perbandingan_alternatif_raport', $id_alternatif, 'nilai_raport');
+    updateComparison($conn, 'perbandingan_alternatif_ekstrakurikuler', $id_alternatif, 'extrakurikuler');
+    updateComparison($conn, 'perbandingan_alternatif_prestasi', $id_alternatif, 'prestasi');
+    updateComparison($conn, 'perbandingan_alternatif_absensi', $id_alternatif, 'absensi');
+
+    header("Location: alternatif.php");
+}
+
+if (isset($_GET['delete'])) {
+    $id = $_GET['delete'];
+    $sql = "DELETE FROM alternatif WHERE id_alternatif = $id";
+    $conn->query($sql);
+
+    updateComparison($conn, 'perbandingan_alternatif_raport', $id, 'nilai_raport');
+    updateComparison($conn, 'perbandingan_alternatif_ekstrakurikuler', $id, 'extrakurikuler');
+    updateComparison($conn, 'perbandingan_alternatif_prestasi', $id, 'prestasi');
+    updateComparison($conn, 'perbandingan_alternatif_absensi', $id, 'absensi');
+
+    header("Location: alternatif.php");
+}
+
+if (isset($_GET['edit'])) {
+    $id = $_GET['edit'];
+    $sql = "SELECT * FROM alternatif WHERE id_alternatif = $id";
+    $result = $conn->query($sql);
+    $alternatif = $result->fetch_assoc();
+}
+
+if (isset($_POST['edit_alternatif'])) {
+    $id = $_POST['id_alternatif'];
+    $nama = $_POST['nama'];
+    $kelas = $_POST['kelas'];
+    $nilai_raport = (int)$_POST['nilai_raport'];
+    $extrakurikuler = (int)$_POST['extrakurikuler'];
+    $prestasi = (int)$_POST['prestasi'];
+    $absensi = (int)$_POST['absensi'];
+    $sql = "UPDATE alternatif SET nama='$nama', kelas='$kelas', nilai_raport='$nilai_raport', 
+            extrakurikuler='$extrakurikuler', prestasi='$prestasi', absensi='$absensi' WHERE id_alternatif=$id";
+    $conn->query($sql);
+
+
+    updateComparison($conn, 'perbandingan_alternatif_raport', $id, 'nilai_raport');
+    updateComparison($conn, 'perbandingan_alternatif_ekstrakurikuler', $id, 'extrakurikuler');
+    updateComparison($conn, 'perbandingan_alternatif_prestasi', $id, 'prestasi');
+    updateComparison($conn, 'perbandingan_alternatif_absensi', $id, 'absensi');
+
+    header("Location: alternatif.php");
+}
+
+
+$sql = "SELECT * FROM alternatif";
+$result = $conn->query($sql);
+?>
+
+
+
 <!doctype html>
 <html class="no-js" lang="en">
 
@@ -62,13 +166,13 @@
                 <div class="menu-inner">
                     <nav>
                         <ul class="metismenu" id="menu">
-                            <li class="active">
+                            <li>
                                 <a href="home.php"><i class="ti-dashboard"></i><span>Dashboard</span></a>
                             </li>
                             <li>
                                 <a href="kriteria.php"><i class="ti-pencil-alt"></i><span>Kriteria</span></a>
                             </li>
-                            <li>
+                            <li class="active">
                                 <a href="alternatif.php"><i class="ti-view-list"></i><span>Alternatif</span></a>
                             </li>
                             <li>
@@ -86,13 +190,13 @@
                                 </ul>
                             </li>
                             <li>
-                                <a href="hasil.php"><i class="ti-check-box"></i><span>Hasil</span></a>
+                                <a href="pendaftaran.php"><i class="ti-check-box"></i><span>Hasil</span></a>
                             </li>
                             <li>
-                                <a href="periode.php"><i class="ti-calendar"></i><span>Periode</span></a>
+                                <a href="pendaftaran.php"><i class="ti-calendar"></i><span>Periode</span></a>
                             </li>
                             <li>
-                                <a href="profile.php"><i class="ti-user"></i><span>Profile</span></a>
+                                <a href="pendaftaran.php"><i class="ti-user"></i><span>Profile</span></a>
                             </li>
                         </ul>
                     </nav>
@@ -137,9 +241,77 @@
 
             <div class="main-content-inner my-4">
 
-                <h1>Selamat Datang di Sistem Pendukung Keputusan</h1>
-                <h6>MIS Bustanul Ulum II adalah sebuah madrasah yang memiliki komitmen kuat terhadap pendidikan yang berkualitas dan berorientasi pada pengembangan potensi siswa secara holistik. Sebagai lembaga pendidikan Islam, MIS Bustanul Ulum II tidak hanya bertujuan untuk meningkatkan akademik siswa, tetapi juga menciptakan lingkungan yang mendukung perkembangan moral, spiritual, dan sosial mereka. Setiap siswa di MIS Bustanul Ulum II memiliki potensi dan kebutuhan yang berbeda. Oleh karena itu, penting bagi madrasah untuk menggunakan pendekatan yang diferensial dalam mengelola proses pembelajaran, menyesuaikan strategi dan program pendidikan dengan karakteristik individu siswa.</h6>
+                <h1>Manajemen Alternatif</h1>
 
+                <form action="alternatif.php" method="post">
+                    <input type="hidden" name="id_alternatif" value="<?= isset($alternatif) ? $alternatif['id_alternatif'] : '' ?>">
+                    <div class="mb-3">
+                        <label for="nama" class="form-label">Nama</label>
+                        <input type="text" name="nama" id="nama" class="form-control" value="<?= isset($alternatif) ? $alternatif['nama'] : '' ?>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="kelas" class="form-label">Kelas</label>
+                        <input type="text" name="kelas" id="kelas" class="form-control" value="<?= isset($alternatif) ? $alternatif['kelas'] : '' ?>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nilai_raport" class="form-label">Nilai Raport</label>
+                        <input type="number" name="nilai_raport" id="nilai_raport" class="form-control" value="<?= isset($alternatif) ? $alternatif['nilai_raport'] : '' ?>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="extrakurikuler" class="form-label">Ekstrakurikuler</label>
+                        <input type="number" name="extrakurikuler" id="extrakurikuler" class="form-control" value="<?= isset($alternatif) ? $alternatif['extrakurikuler'] : '' ?>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="prestasi" class="form-label">Prestasi</label>
+                        <input type="number" name="prestasi" id="prestasi" class="form-control" value="<?= isset($alternatif) ? $alternatif['prestasi'] : '' ?>" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="absensi" class="form-label">Absensi</label>
+                        <input type="number" name="absensi" id="absensi" class="form-control" value="<?= isset($alternatif) ? $alternatif['absensi'] : '' ?>" required>
+                    </div>
+
+                    <?php if (isset($alternatif)): ?>
+                        <button type="submit" name="edit_alternatif" class="btn btn-primary">Update</button>
+                        <a href="alternatif.php" class="btn btn-secondary">Cancel</a>
+                    <?php else: ?>
+                        <button type="submit" name="add_alternatif" class="btn btn-success">Add</button>
+                    <?php endif; ?>
+                </form>
+
+                <h2 class="mt-4">Daftar Alternatif</h2>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama</th>
+                            <th>Kelas</th>
+                            <th>Nilai Raport</th>
+                            <th>Ekstrakurikuler</th>
+                            <th>Prestasi</th>
+                            <th>Absensi</th>
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $no = 1;
+                        while ($row = $result->fetch_assoc()): ?>
+                            <tr>
+                                <td><?= $no++ ?></td>
+                                <td><?= $row['nama'] ?></td>
+                                <td><?= $row['kelas'] ?></td>
+                                <td><?= $row['nilai_raport'] ?></td>
+                                <td><?= $row['extrakurikuler'] ?></td>
+                                <td><?= $row['prestasi'] ?></td>
+                                <td><?= $row['absensi'] ?></td>
+                                <td>
+                                    <a href="alternatif.php?edit=<?= $row['id_alternatif'] ?>" class="btn btn-warning btn-sm">Edit</a>
+                                    <a href="alternatif.php?delete=<?= $row['id_alternatif'] ?>" class="btn btn-danger btn-sm">Delete</a>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
 
             </div>
         </div>

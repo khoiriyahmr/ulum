@@ -1,55 +1,67 @@
 <?php
-session_start();
+include 'config.php';
 
-include '../config.php';
 
-if (!isset($_SESSION['id_admin'])) {
-    header("Location: login.php");
-    exit;
+
+$sql = "SELECT id_alternatif, nama, nilai_raport, extrakurikuler, prestasi, absensi FROM alternatif";
+$result = $conn->query($sql);
+
+if (!$result) {
+    die("Error: " . $conn->error);
 }
 
-$id_admin = $_SESSION['id_admin'];
-
-$sql = "SELECT * FROM admin WHERE id_admin = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $id_admin);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    $nama = $row['nama'];
-    $email = $row['email'];
-    $password = $row['password'];
-} else {
-
-    header("Location: ../profile.php");
-    exit;
-}
-$stmt->close();
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $new_nama = $_POST['nama'];
-    $new_password = $_POST['password'];
-
-
-    $sql = "UPDATE admin SET nama = ?, password = ? WHERE id_admin = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssi", $new_nama, $new_password, $id_admin);
-
-    if ($stmt->execute()) {
-
-        header("Location: ../profile.php");
-        exit;
-    } else {
-        echo "Gagal memperbarui profil: " . $stmt->error;
-    }
-
-    $stmt->close();
+$alternatifs = [];
+while ($row = $result->fetch_assoc()) {
+    $alternatifs[$row['id_alternatif']] = [
+        'nama' => $row['nama'],
+        'nilai_raport' => $row['nilai_raport'],
+        'extrakurikuler' => $row['extrakurikuler'],
+        'prestasi' => $row['prestasi'],
+        'absensi' => $row['absensi']
+    ];
 }
 
-$conn->close();
+
+$weights = [
+    'nilai_raport' => 0.25,
+    'extrakurikuler' => 0.25,
+    'prestasi' => 0.25,
+    'absensi' => 0.25
+];
+
+
+function calculate_final_score($alternatif, $weights)
+{
+    return ($alternatif['nilai_raport'] * $weights['nilai_raport']) +
+        ($alternatif['extrakurikuler'] * $weights['extrakurikuler']) +
+        ($alternatif['prestasi'] * $weights['prestasi']) +
+        ($alternatif['absensi'] * $weights['absensi']);
+}
+
+
+$final_scores = [];
+foreach ($alternatifs as $id => $alt) {
+    $final_scores[$id] = calculate_final_score($alt, $weights);
+}
+
+
+$conn->query("DELETE FROM hasil");
+
+
+arsort($final_scores);
+$ranking = 1;
+foreach ($final_scores as $id => $score) {
+    $stmt = $conn->prepare("INSERT INTO hasil (id_alternatif, nilai_akhir, ranking) VALUES (?, ?, ?)");
+    $stmt->bind_param("idi", $id, $score, $ranking);
+    $stmt->execute();
+    $ranking++;
+}
 ?>
+
+
+
+
+
 
 <!doctype html>
 <html class="no-js" lang="en">
@@ -62,13 +74,13 @@ $conn->close();
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>Bustanul Ulum</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" type="image/png" href="../assets/images/icon/favicon.ico">
-    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../assets/css/font-awesome.min.css">
-    <link rel="stylesheet" href="../assets/css/themify-icons.css">
-    <link rel="stylesheet" href="../assets/css/metisMenu.css">
-    <link rel="stylesheet" href="../assets/css/owl.carousel.min.css">
-    <link rel="stylesheet" href="../assets/css/slicknav.min.css">
+    <link rel="shortcut icon" type="image/png" href="assets/images/icon/favicon.ico">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/css/themify-icons.css">
+    <link rel="stylesheet" href="assets/css/metisMenu.css">
+    <link rel="stylesheet" href="assets/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="assets/css/slicknav.min.css">
     <!-- amchart css -->
     <link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all" />
     <!-- Start datatable css -->
@@ -92,12 +104,12 @@ $conn->close();
     </script>
 
 
-    <link rel="stylesheet" href="../assets/css/typography.css">
-    <link rel="stylesheet" href="../assets/css/default-css.css">
-    <link rel="stylesheet" href="../assets/css/styles.css">
-    <link rel="stylesheet" href="../assets/css/responsive.css">
+    <link rel="stylesheet" href="assets/css/typography.css">
+    <link rel="stylesheet" href="assets/css/default-css.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
 
-    <script src="../assets/js/vendor/modernizr-2.8.3.min.js"></script>
+    <script src="assets/js/vendor/modernizr-2.8.3.min.js"></script>
 </head>
 
 <body>
@@ -138,13 +150,13 @@ $conn->close();
                                     <li><a href="absensi.php"><i class="ti-close"></i><span style="margin-left: 5px;">Absensi</span></a></li>
                                 </ul>
                             </li>
-                            <li>
+                            <li class="active">
                                 <a href="pendaftaran.php"><i class="ti-check-box"></i><span>Hasil</span></a>
                             </li>
                             <li>
                                 <a href="pendaftaran.php"><i class="ti-calendar"></i><span>Periode</span></a>
                             </li>
-                            <li class="active">
+                            <li>
                                 <a href="pendaftaran.php"><i class="ti-user"></i><span>Profile</span></a>
                             </li>
                         </ul>
@@ -190,29 +202,39 @@ $conn->close();
 
             <div class="main-content-inner my-4">
 
-                <div class="row justify-content-center">
-                    <div class="col-md-6">
-                        <h2>Edit Profile</h2>
-                        <form action="edit_profile.php" method="post">
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Name</label>
-                                <input type="text" class="form-control" id="name" name="nama" value="<?php echo htmlspecialchars($nama); ?>" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($email); ?>" readonly>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="text" class="form-control" id="password" name="password" value="<?php echo htmlspecialchars($password); ?>" required>
-                            </div>
-                            <div class="d-grid gap-2 mb-3">
-                                <button type="submit" class="btn btn-primary">Simpan</button>
-                                <a href="../profile.php" class="btn btn-secondary">Batal</a>
-                            </div>
-                        </form>
-                    </div>
-                </div>
+                <h2 class="mb-4">Hasil Perbandingan Alternatif</h2>
+
+                <?php
+
+                $sql = "SELECT a.nama, h.nilai_akhir, h.ranking 
+        FROM hasil h 
+        JOIN alternatif a ON h.id_alternatif = a.id_alternatif 
+        ORDER BY h.ranking";
+                $result = $conn->query($sql);
+
+                if (!$result) {
+                    die("Error: " . $conn->error);
+                }
+                ?>
+
+                <table class="table table-bordered">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>Ranking</th>
+                            <th>Alternatif</th>
+                            <th>Nilai Akhir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php while ($row = $result->fetch_assoc()) : ?>
+                            <tr>
+                                <td><?php echo htmlspecialchars($row['ranking']); ?></td>
+                                <td><?php echo htmlspecialchars($row['nama']); ?></td>
+                                <td><?php echo number_format($row['nilai_akhir'], 2); ?></td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
             </div>
 
 
@@ -224,13 +246,13 @@ $conn->close();
         </div>
         <?php include('footer.html'); ?>
     </div>
-    <script src="../assets/js/vendor/jquery-2.2.4.min.js"></script>
-    <script src="../assets/js/popper.min.js"></script>
-    <script src="../assets/js/bootstrap.min.js"></script>
-    <script src="../assets/js/owl.carousel.min.js"></script>
-    <script src="../assets/js/metisMenu.min.js"></script>
-    <script src="../assets/js/jquery.slimscroll.min.js"></script>
-    <script src="../assets/js/jquery.slicknav.min.js"></script>
+    <script src="assets/js/vendor/jquery-2.2.4.min.js"></script>
+    <script src="assets/js/popper.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/owl.carousel.min.js"></script>
+    <script src="assets/js/metisMenu.min.js"></script>
+    <script src="assets/js/jquery.slimscroll.min.js"></script>
+    <script src="assets/js/jquery.slicknav.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
@@ -246,10 +268,10 @@ $conn->close();
         zingchart.MODULESDIR = "https://cdn.zingchart.com/modules/";
         ZC.LICENSE = ["569d52cefae586f634c54f86dc99e6a9", "ee6b7db5b51705a13dc2339db3edaf6d"];
     </script>
-    <script src="../assets/js/line-chart.js"></script>
-    <script src="../assets/js/pie-chart.js"></script>
-    <script src="../assets/js/plugins.js"></script>
-    <script src="../assets/js/scripts.js"></script>
+    <script src="assets/js/line-chart.js"></script>
+    <script src="assets/js/pie-chart.js"></script>
+    <script src="assets/js/plugins.js"></script>
+    <script src="assets/js/scripts.js"></script>
 </body>
 
 </html>

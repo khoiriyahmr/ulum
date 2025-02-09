@@ -1,55 +1,40 @@
 <?php
-session_start();
+include 'config.php';
 
-include '../config.php';
 
-if (!isset($_SESSION['id_admin'])) {
-    header("Location: login.php");
-    exit;
+if (isset($_POST['add_kriteria'])) {
+    $nama_kriteria = $_POST['nama_kriteria'];
+
+    $sql = "INSERT INTO kriteria (nama_kriteria) VALUES ('$nama_kriteria')";
+    $conn->query($sql);
 }
 
-$id_admin = $_SESSION['id_admin'];
 
-$sql = "SELECT * FROM admin WHERE id_admin = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $id_admin);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    $nama = $row['nama'];
-    $email = $row['email'];
-    $password = $row['password'];
-} else {
-
-    header("Location: ../profile.php");
-    exit;
-}
-$stmt->close();
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $new_nama = $_POST['nama'];
-    $new_password = $_POST['password'];
-
-
-    $sql = "UPDATE admin SET nama = ?, password = ? WHERE id_admin = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssi", $new_nama, $new_password, $id_admin);
-
-    if ($stmt->execute()) {
-
-        header("Location: ../profile.php");
-        exit;
-    } else {
-        echo "Gagal memperbarui profil: " . $stmt->error;
-    }
-
-    $stmt->close();
+if (isset($_GET['delete'])) {
+    $id = $_GET['delete'];
+    $sql = "DELETE FROM kriteria WHERE id_kriteria = $id";
+    $conn->query($sql);
 }
 
-$conn->close();
+
+if (isset($_GET['edit'])) {
+    $id = $_GET['edit'];
+    $sql = "SELECT * FROM kriteria WHERE id_kriteria = $id";
+    $result = $conn->query($sql);
+    $kriteria = $result->fetch_assoc();
+}
+
+if (isset($_POST['edit_kriteria'])) {
+    $id = $_POST['id_kriteria'];
+    $nama_kriteria = $_POST['nama_kriteria'];
+
+    $sql = "UPDATE kriteria SET nama_kriteria='$nama_kriteria' WHERE id_kriteria=$id";
+    $conn->query($sql);
+    header("Location: kriteria.php");
+}
 ?>
+
+
 
 <!doctype html>
 <html class="no-js" lang="en">
@@ -62,13 +47,13 @@ $conn->close();
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>Bustanul Ulum</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" type="image/png" href="../assets/images/icon/favicon.ico">
-    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../assets/css/font-awesome.min.css">
-    <link rel="stylesheet" href="../assets/css/themify-icons.css">
-    <link rel="stylesheet" href="../assets/css/metisMenu.css">
-    <link rel="stylesheet" href="../assets/css/owl.carousel.min.css">
-    <link rel="stylesheet" href="../assets/css/slicknav.min.css">
+    <link rel="shortcut icon" type="image/png" href="assets/images/icon/favicon.ico">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/css/themify-icons.css">
+    <link rel="stylesheet" href="assets/css/metisMenu.css">
+    <link rel="stylesheet" href="assets/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="assets/css/slicknav.min.css">
     <!-- amchart css -->
     <link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all" />
     <!-- Start datatable css -->
@@ -92,12 +77,12 @@ $conn->close();
     </script>
 
 
-    <link rel="stylesheet" href="../assets/css/typography.css">
-    <link rel="stylesheet" href="../assets/css/default-css.css">
-    <link rel="stylesheet" href="../assets/css/styles.css">
-    <link rel="stylesheet" href="../assets/css/responsive.css">
+    <link rel="stylesheet" href="assets/css/typography.css">
+    <link rel="stylesheet" href="assets/css/default-css.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
 
-    <script src="../assets/js/vendor/modernizr-2.8.3.min.js"></script>
+    <script src="assets/js/vendor/modernizr-2.8.3.min.js"></script>
 </head>
 
 <body>
@@ -118,11 +103,11 @@ $conn->close();
                             <li>
                                 <a href="home.php"><i class="ti-dashboard"></i><span>Dashboard</span></a>
                             </li>
-                            <li>
+                            <li class="active">
                                 <a href="kriteria.php"><i class="ti-pencil-alt"></i><span>Kriteria</span></a>
                             </li>
                             <li>
-                                <a href="pendaftaran.php"><i class="ti-view-list"></i><span>Alternatif</span></a>
+                                <a href="alternatif.php"><i class="ti-view-list"></i><span>Alternatif</span></a>
                             </li>
                             <li>
                                 <a href="perbandingan_kriteria.php"><i class="ti-exchange-vertical"></i><span>Perbandingan Kriteria</span></a>
@@ -134,7 +119,7 @@ $conn->close();
                                 <ul aria-expanded="false" class="collapse">
                                     <li><a href="raport.php"><i class="ti-file"></i><span style="margin-left: 5px;">Nilai Raport</span></a></li>
                                     <li><a href="ekstra.php"><i class="ti-plus"></i><span style="margin-left: 5px;">Ekstrakurikuler</span></a></li>
-                                    <li><a href="edit_admin.php"><i class="ti-pencil"></i><span style="margin-left: 5px;">Prestasi</span></a></li>
+                                    <li><a href="prestasi.php"><i class="ti-pencil"></i><span style="margin-left: 5px;">Prestasi</span></a></li>
                                     <li><a href="absensi.php"><i class="ti-close"></i><span style="margin-left: 5px;">Absensi</span></a></li>
                                 </ul>
                             </li>
@@ -144,7 +129,7 @@ $conn->close();
                             <li>
                                 <a href="pendaftaran.php"><i class="ti-calendar"></i><span>Periode</span></a>
                             </li>
-                            <li class="active">
+                            <li>
                                 <a href="pendaftaran.php"><i class="ti-user"></i><span>Profile</span></a>
                             </li>
                         </ul>
@@ -190,47 +175,77 @@ $conn->close();
 
             <div class="main-content-inner my-4">
 
-                <div class="row justify-content-center">
-                    <div class="col-md-6">
-                        <h2>Edit Profile</h2>
-                        <form action="edit_profile.php" method="post">
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Name</label>
-                                <input type="text" class="form-control" id="name" name="nama" value="<?php echo htmlspecialchars($nama); ?>" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($email); ?>" readonly>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="text" class="form-control" id="password" name="password" value="<?php echo htmlspecialchars($password); ?>" required>
-                            </div>
-                            <div class="d-grid gap-2 mb-3">
-                                <button type="submit" class="btn btn-primary">Simpan</button>
-                                <a href="../profile.php" class="btn btn-secondary">Batal</a>
-                            </div>
-                        </form>
+                <h1>Manajemen Kriteria</h1>
+
+
+                <form action="" method="POST" class="mb-3">
+                    <div class="mb-3">
+                        <label for="nama_kriteria" class="form-label">Nama Kriteria</label>
+                        <input type="text" class="form-control" id="nama_kriteria" name="nama_kriteria" placeholder="Nama Kriteria" required>
                     </div>
-                </div>
+
+                    <button type="submit" name="add_kriteria" class="btn btn-primary">Add</button>
+                </form>
+
+                <?php if (isset($kriteria)) : ?>
+                    <h2>Edit Kriteria</h2>
+                    <form action="" method="POST" class="mb-3">
+                        <input type="hidden" name="id_kriteria" value="<?php echo $kriteria['id_kriteria']; ?>">
+                        <div class="mb-3">
+                            <label for="nama_kriteria_edit" class="form-label">Nama Kriteria</label>
+                            <input type="text" class="form-control" id="nama_kriteria_edit" name="nama_kriteria" value="<?php echo $kriteria['nama_kriteria']; ?>" required>
+                        </div>
+
+                        <button type="submit" name="edit_kriteria" class="btn btn-primary">Update</button>
+                    </form>
+                <?php endif; ?>
+
+                <h2>Daftar Kriteria</h2>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Nomor</th>
+                            <th>Nama Kriteria</th>
+
+                            <th>Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $sql = "SELECT * FROM kriteria";
+                        $result = $conn->query($sql);
+                        $no = 1; // Inisialisasi nomor urut
+
+                        while ($row = $result->fetch_assoc()) {
+                            echo "<tr>";
+                            echo "<td>" . $no++ . "</td>"; // Menampilkan nomor urut
+                            echo "<td>" . $row['nama_kriteria'] . "</td>";
+                            echo "<td>
+<a href='kriteria.php?edit=" . $row['id_kriteria'] . "' class='btn btn-warning btn-sm'>Edit</a>
+<a href='kriteria.php?delete=" . $row['id_kriteria'] . "' class='btn btn-danger btn-sm' onclick=\"return confirm('Anda yakin ingin menghapus kriteria ini?')\">Delete</a>
+</td>";
+                            echo "</tr>";
+                        }
+                        ?>
+                    </tbody>
+
+                </table>
+
             </div>
-
-
-
-
-
-            <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
-            <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
         </div>
-        <?php include('footer.html'); ?>
+
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.5/font/bootstrap-icons.min.css" rel="stylesheet">
     </div>
-    <script src="../assets/js/vendor/jquery-2.2.4.min.js"></script>
-    <script src="../assets/js/popper.min.js"></script>
-    <script src="../assets/js/bootstrap.min.js"></script>
-    <script src="../assets/js/owl.carousel.min.js"></script>
-    <script src="../assets/js/metisMenu.min.js"></script>
-    <script src="../assets/js/jquery.slimscroll.min.js"></script>
-    <script src="../assets/js/jquery.slicknav.min.js"></script>
+    <?php include('footer.html'); ?>
+    </div>
+    <script src="assets/js/vendor/jquery-2.2.4.min.js"></script>
+    <script src="assets/js/popper.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/owl.carousel.min.js"></script>
+    <script src="assets/js/metisMenu.min.js"></script>
+    <script src="assets/js/jquery.slimscroll.min.js"></script>
+    <script src="assets/js/jquery.slicknav.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
@@ -246,10 +261,10 @@ $conn->close();
         zingchart.MODULESDIR = "https://cdn.zingchart.com/modules/";
         ZC.LICENSE = ["569d52cefae586f634c54f86dc99e6a9", "ee6b7db5b51705a13dc2339db3edaf6d"];
     </script>
-    <script src="../assets/js/line-chart.js"></script>
-    <script src="../assets/js/pie-chart.js"></script>
-    <script src="../assets/js/plugins.js"></script>
-    <script src="../assets/js/scripts.js"></script>
+    <script src="assets/js/line-chart.js"></script>
+    <script src="assets/js/pie-chart.js"></script>
+    <script src="assets/js/plugins.js"></script>
+    <script src="assets/js/scripts.js"></script>
 </body>
 
 </html>

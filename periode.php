@@ -1,55 +1,26 @@
 <?php
-session_start();
-
-include '../config.php';
-
-if (!isset($_SESSION['id_admin'])) {
-    header("Location: login.php");
-    exit;
-}
-
-$id_admin = $_SESSION['id_admin'];
-
-$sql = "SELECT * FROM admin WHERE id_admin = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $id_admin);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows > 0) {
-    $row = $result->fetch_assoc();
-    $nama = $row['nama'];
-    $email = $row['email'];
-    $password = $row['password'];
-} else {
-
-    header("Location: ../profile.php");
-    exit;
-}
-$stmt->close();
-
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $new_nama = $_POST['nama'];
-    $new_password = $_POST['password'];
+include 'config.php';
 
 
-    $sql = "UPDATE admin SET nama = ?, password = ? WHERE id_admin = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssi", $new_nama, $new_password, $id_admin);
 
-    if ($stmt->execute()) {
+$kelas_filter = isset($_GET['kelas']) ? $_GET['kelas'] : 'all';
 
-        header("Location: ../profile.php");
-        exit;
-    } else {
-        echo "Gagal memperbarui profil: " . $stmt->error;
-    }
 
-    $stmt->close();
-}
+$kelas_query = "SELECT DISTINCT kelas FROM alternatif";
+$kelas_result = $conn->query($kelas_query);
 
-$conn->close();
+
+$filter_query = $kelas_filter == 'all' ? "" : "AND a.kelas = '$kelas_filter'";
+
+
+$sql = "SELECT p.id_periode, p.tahun, a.nama, a.kelas 
+        FROM periode p
+        JOIN alternatif a ON p.id_alternatif = a.id_alternatif
+        WHERE 1=1 $filter_query
+        ORDER BY p.tahun DESC";
+$result = $conn->query($sql);
 ?>
+
 
 <!doctype html>
 <html class="no-js" lang="en">
@@ -62,13 +33,13 @@ $conn->close();
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <title>Bustanul Ulum</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" type="image/png" href="../assets/images/icon/favicon.ico">
-    <link rel="stylesheet" href="../assets/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../assets/css/font-awesome.min.css">
-    <link rel="stylesheet" href="../assets/css/themify-icons.css">
-    <link rel="stylesheet" href="../assets/css/metisMenu.css">
-    <link rel="stylesheet" href="../assets/css/owl.carousel.min.css">
-    <link rel="stylesheet" href="../assets/css/slicknav.min.css">
+    <link rel="shortcut icon" type="image/png" href="assets/images/icon/favicon.ico">
+    <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="assets/css/font-awesome.min.css">
+    <link rel="stylesheet" href="assets/css/themify-icons.css">
+    <link rel="stylesheet" href="assets/css/metisMenu.css">
+    <link rel="stylesheet" href="assets/css/owl.carousel.min.css">
+    <link rel="stylesheet" href="assets/css/slicknav.min.css">
     <!-- amchart css -->
     <link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all" />
     <!-- Start datatable css -->
@@ -92,12 +63,12 @@ $conn->close();
     </script>
 
 
-    <link rel="stylesheet" href="../assets/css/typography.css">
-    <link rel="stylesheet" href="../assets/css/default-css.css">
-    <link rel="stylesheet" href="../assets/css/styles.css">
-    <link rel="stylesheet" href="../assets/css/responsive.css">
+    <link rel="stylesheet" href="assets/css/typography.css">
+    <link rel="stylesheet" href="assets/css/default-css.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
 
-    <script src="../assets/js/vendor/modernizr-2.8.3.min.js"></script>
+    <script src="assets/js/vendor/modernizr-2.8.3.min.js"></script>
 </head>
 
 <body>
@@ -141,10 +112,10 @@ $conn->close();
                             <li>
                                 <a href="pendaftaran.php"><i class="ti-check-box"></i><span>Hasil</span></a>
                             </li>
-                            <li>
+                            <li class="active">
                                 <a href="pendaftaran.php"><i class="ti-calendar"></i><span>Periode</span></a>
                             </li>
-                            <li class="active">
+                            <li>
                                 <a href="pendaftaran.php"><i class="ti-user"></i><span>Profile</span></a>
                             </li>
                         </ul>
@@ -190,29 +161,51 @@ $conn->close();
 
             <div class="main-content-inner my-4">
 
-                <div class="row justify-content-center">
-                    <div class="col-md-6">
-                        <h2>Edit Profile</h2>
-                        <form action="edit_profile.php" method="post">
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Name</label>
-                                <input type="text" class="form-control" id="name" name="nama" value="<?php echo htmlspecialchars($nama); ?>" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" name="email" value="<?php echo htmlspecialchars($email); ?>" readonly>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="text" class="form-control" id="password" name="password" value="<?php echo htmlspecialchars($password); ?>" required>
-                            </div>
-                            <div class="d-grid gap-2 mb-3">
-                                <button type="submit" class="btn btn-primary">Simpan</button>
-                                <a href="../profile.php" class="btn btn-secondary">Batal</a>
-                            </div>
-                        </form>
+                <h1 class="mb-4">Daftar Periode</h1>
+
+                <form method="GET" action="" class="mb-4">
+                    <div class="mb-3">
+                        <label for="kelas" class="form-label">Filter Kelas:</label>
+                        <select name="kelas" id="kelas" class="form-select" onchange="this.form.submit()">
+                            <option value="all" <?php echo $kelas_filter == 'all' ? 'selected' : ''; ?>>All</option>
+                            <?php while ($kelas_row = $kelas_result->fetch_assoc()) : ?>
+                                <option value="<?php echo htmlspecialchars($kelas_row['kelas']); ?>" <?php echo htmlspecialchars($kelas_row['kelas']) == $kelas_filter ? 'selected' : ''; ?>>
+                                    <?php echo htmlspecialchars($kelas_row['kelas']); ?>
+                                </option>
+                            <?php endwhile; ?>
+                        </select>
                     </div>
-                </div>
+                </form>
+
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Tahun</th>
+                            <th>Nama Alternatif</th>
+                            <th>Kelas</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        $no = 1;
+                        if ($result->num_rows > 0) {
+                            while ($row = $result->fetch_assoc()) :
+                        ?>
+                                <tr>
+                                    <td><?php echo $no++; ?></td>
+                                    <td><?php echo htmlspecialchars($row['tahun']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['nama']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['kelas']); ?></td>
+                                </tr>
+                        <?php
+                            endwhile;
+                        } else {
+                            echo '<tr><td colspan="4" class="text-center">Tidak ada data yang tersedia</td></tr>';
+                        }
+                        ?>
+                    </tbody>
+                </table>
             </div>
 
 
@@ -224,13 +217,13 @@ $conn->close();
         </div>
         <?php include('footer.html'); ?>
     </div>
-    <script src="../assets/js/vendor/jquery-2.2.4.min.js"></script>
-    <script src="../assets/js/popper.min.js"></script>
-    <script src="../assets/js/bootstrap.min.js"></script>
-    <script src="../assets/js/owl.carousel.min.js"></script>
-    <script src="../assets/js/metisMenu.min.js"></script>
-    <script src="../assets/js/jquery.slimscroll.min.js"></script>
-    <script src="../assets/js/jquery.slicknav.min.js"></script>
+    <script src="assets/js/vendor/jquery-2.2.4.min.js"></script>
+    <script src="assets/js/popper.min.js"></script>
+    <script src="assets/js/bootstrap.min.js"></script>
+    <script src="assets/js/owl.carousel.min.js"></script>
+    <script src="assets/js/metisMenu.min.js"></script>
+    <script src="assets/js/jquery.slimscroll.min.js"></script>
+    <script src="assets/js/jquery.slicknav.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.5.2/js/buttons.print.min.js"></script>
     <script src="https://cdn.datatables.net/buttons/1.5.2/js/dataTables.buttons.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.js"></script>
@@ -246,10 +239,10 @@ $conn->close();
         zingchart.MODULESDIR = "https://cdn.zingchart.com/modules/";
         ZC.LICENSE = ["569d52cefae586f634c54f86dc99e6a9", "ee6b7db5b51705a13dc2339db3edaf6d"];
     </script>
-    <script src="../assets/js/line-chart.js"></script>
-    <script src="../assets/js/pie-chart.js"></script>
-    <script src="../assets/js/plugins.js"></script>
-    <script src="../assets/js/scripts.js"></script>
+    <script src="assets/js/line-chart.js"></script>
+    <script src="assets/js/pie-chart.js"></script>
+    <script src="assets/js/plugins.js"></script>
+    <script src="assets/js/scripts.js"></script>
 </body>
 
 </html>
